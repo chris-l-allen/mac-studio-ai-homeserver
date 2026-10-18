@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import os
 import pathlib
 import re
 import subprocess
@@ -184,6 +185,38 @@ def money(value: float | None) -> str:
     return f"${value:,.2f}" if value is not None else "—"
 
 
+def _run_silent(cmd: list[str]) -> None:
+    try:
+        subprocess.run(
+            cmd, check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        )
+    except Exception as exc:  # notify must never crash the poll
+        print(f"  ! notify command failed: {exc}", file=sys.stderr)
+
+
+def notify_buy(result: dict, dry_run: bool = False) -> None:
+    """On a hit: open the listing, play a sound, and speak the alert (macOS)."""
+    label = result["label"]
+    price = result["price_cad"]
+    url = result["url"]
+    amount = f"{price:,.0f} dollars" if price is not None else "the target price"
+    phrase = f"Buy alert. {label}, {amount}."
+
+    if dry_run:
+        print(f"  [dry-run] open {url}")
+        print("  [dry-run] afplay /System/Library/Sounds/Glass.aiff")
+        print(f'  [dry-run] say "{phrase}"')
+        return
+
+    if sys.platform == "darwin":
+        _run_silent(["/usr/bin/open", url])
+        if os.path.exists("/System/Library/Sounds/Glass.aiff"):
+            _run_silent(["/usr/bin/afplay", "/System/Library/Sounds/Glass.aiff"])
+        _run_silent(["/usr/bin/say", phrase])
+    else:
+        print(f"BUY: {label} — {url} ({phrase})")
+
+
 def render_md(snapshot: dict) -> str:
     lines = [
         "# Hardware watchlist",
@@ -288,6 +321,18 @@ def main() -> int:
     JSON_OUT.write_text(json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n")
     MD_OUT.write_text(render_md(snapshot))
     print("Snapshot changed; wrote watchlist files.")
+
+    # Alert only for targets that just became BUY (not ones already at BUY).
+    newly_buy = [
+        r
+        for r in results
+        if r["state"] == "buy" and prev_by_id.get(r["id"], {}).get("state") != "buy"
+    ]
+    if newly_buy:
+        print(f"!! {len(newly_buy)} new buy alert(s)")
+        dry = os.environ.get("WATCH_DRY_RUN") == "1"
+        for r in newly_buy:
+            notify_buy(r, dry_run=dry)
 
     if args.commit:
         commit_if_changed(snapshot)

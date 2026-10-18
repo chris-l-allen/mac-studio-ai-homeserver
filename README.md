@@ -331,6 +331,8 @@ at/below the goal.
   `cp launchd/com.local.hardware-watch.plist ~/Library/LaunchAgents/ && launchctl load ~/Library/LaunchAgents/com.local.hardware-watch.plist`
 - Change what to watch and the goal prices in **`watchlist/targets.json`**.
 - Run it manually anytime: `python3 scripts/poll-hardware.py` (add `--commit` to push).
+- On a fresh **BUY**, it opens the listing in the default browser, plays a system
+  sound, and speaks the alert via `say` (macOS).
 - The tracked M3 Ultra SKU (`G1CE9LL/A`) is the **96 GB / 4 TB** variant; add the
   1 TB SKU to `targets.json` if/when you find it, since that's the cheaper config.
 
