@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Runs the refurb-hardware poller every 6 hours and commits/pushes any change.
+  Perfect here because the Mac Studio this is being built for is always on.
+
+  Install:
+    cp launchd/com.local.hardware-watch.plist ~/Library/LaunchAgents/
+    launchctl load ~/Library/LaunchAgents/com.local.hardware-watch.plist
+
+  Run once now:
+    launchctl start com.local.hardware-watch
+
+  Uninstall:
+    launchctl unload ~/Library/LaunchAgents/com.local.hardware-watch.plist
+    rm ~/Library/LaunchAgents/com.local.hardware-watch.plist
+
+  Adjust paths if the repo lives elsewhere or python3 is not at /usr/local/bin.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.local.hardware-watch</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/python3</string>
+        <string>/Users/callen/mac-studio-ai-homeserver/scripts/poll-hardware.py</string>
+        <string>--commit</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/callen/mac-studio-ai-homeserver</string>
+
+    <!-- seconds between runs: 6 hours -->
+    <key>StartInterval</key>
+    <integer>21600</integer>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/hardware-watch.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/hardware-watch.err</string>
+</dict>
+</plist>

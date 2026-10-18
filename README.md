@@ -9,6 +9,8 @@
 
 **Status:** 🟡 Hardware selection / pre-build. Nothing here has been assembled yet.
 
+**Rendered docs:** https://chris-l-allen.github.io/mac-studio-ai-homeserver/
+
 ---
 
 ## What this is
@@ -283,15 +285,23 @@ input works but is heavy — treat it as out-of-scope for 24/7 serving.
 ```
 .
 ├── README.md
+├── _config.yml                # GitHub Pages (Jekyll theme)
+├── index.md                   # rendered docs page (includes README)
 ├── compose.yaml               # web/services stack (Ollama is NOT here)
 ├── .env.example
 ├── caddy/
 │   └── Caddyfile              # internal reverse proxy + TLS
 ├── launchd/
-│   └── com.local.ollama.plist # keep Ollama running at login/boot
+│   ├── com.local.ollama.plist # keep Ollama running at login/boot
+│   └── com.local.hardware-watch.plist  # poll refurb stock every 6h + commit
+├── watchlist/
+│   ├── targets.json           # what to watch + goal prices
+│   ├── latest.json            # generated snapshot
+│   └── README.md              # generated table
 └── scripts/
     ├── pull-models.sh         # download Qwen3.8-27B
-    └── serve-ollama.sh        # foreground dev/test server
+    ├── serve-ollama.sh        # foreground dev/test server
+    └── poll-hardware.py       # refurb stock/price poller
 ```
 
 ---
@@ -306,6 +316,27 @@ input works but is heavy — treat it as out-of-scope for 24/7 serving.
 - **Avoid marketplace/used** Macs: Apple Silicon RAM is soldered (unupgradeable), and
   used units carry Activation Lock / MDM (enterprise) risk.
 - **Skip the 4 TB SSD** config; buy 512 GB–1 TB.
+
+---
+
+## Hardware watchlist (automated)
+
+`launchd/com.local.hardware-watch.plist` runs `scripts/poll-hardware.py --commit`
+**every 6 hours on the always-on Mac Studio**, checks the target refurb listings, and
+commits an updated `watchlist/latest.json` + `watchlist/README.md` when anything
+changes. A row flagged **BUY** means the SKU is *in stock* and its listed price is
+at/below the goal.
+
+- Install the schedule:
+  `cp launchd/com.local.hardware-watch.plist ~/Library/LaunchAgents/ && launchctl load ~/Library/LaunchAgents/com.local.hardware-watch.plist`
+- Change what to watch and the goal prices in **`watchlist/targets.json`**.
+- Run it manually anytime: `python3 scripts/poll-hardware.py` (add `--commit` to push).
+- The tracked M3 Ultra SKU (`G1CE9LL/A`) is the **96 GB / 4 TB** variant; add the
+  1 TB SKU to `targets.json` if/when you find it, since that's the cheaper config.
+
+> The poller reads each page's JSON-LD `Product`/`Offer` (authoritative per-SKU price
+> and availability), not the JavaScript configurator. It's still best-effort: Apple
+> can change markup or block automated requests, and refurb stock rotates fast.
 
 ---
 

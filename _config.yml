@@ -1,0 +1,4 @@
+title: Mac Studio AI Home Server
+description: A silent, always-on Apple Silicon homelab serving internal services and Qwen3.8-27B over an OpenAI-compatible API.
+theme: jekyll-theme-cayman
+show_downloads: false
