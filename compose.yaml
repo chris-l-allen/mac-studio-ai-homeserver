@@ -1,0 +1,60 @@
+# ---------------------------------------------------------------------------
+# Homelab web/services stack.
+#
+# Ollama is intentionally NOT defined here: on Apple Silicon it must run
+# natively so it can use the Metal GPU. Docker/OrbStack containers on macOS
+# have no GPU passthrough, so a containerized Ollama would fall back to CPU.
+#
+# Start with:  docker compose up -d
+# ---------------------------------------------------------------------------
+name: homelab
+
+services:
+  # Reverse proxy: internal TLS + routing for *.internal
+  caddy:
+    image: caddy:2
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - lan
+
+  # Landing page / dashboard for all services
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    restart: unless-stopped
+    environment:
+      - HOMEPAGE_ALLOWED_HOSTS=*
+      - TZ=${TZ:-America/Toronto}
+    volumes:
+      - ./homepage:/app/config
+    networks:
+      - lan
+
+  # Uptime / health monitoring
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: uptime-kuma
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ:-America/Toronto}
+    volumes:
+      - uptime_data:/app/data
+    networks:
+      - lan
+
+networks:
+  lan:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:
+  uptime_data:

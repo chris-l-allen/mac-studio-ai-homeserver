@@ -1,0 +1,34 @@
+# Internal reverse proxy.
+#
+# "tls internal" issues a locally-trusted cert from Caddy's own CA, so you get
+# HTTPS on the LAN without exposing anything to the public internet. Trust the
+# root cert on your devices: it lives in the container's data volume.
+#
+# Resolve *.internal via your router or a local DNS entry (e.g. Pi-hole).
+
+{
+	# email admin@example.internal
+}
+
+# Dashboard
+homepage.internal {
+	tls internal
+	reverse_proxy homepage:3000
+}
+
+# Uptime monitor
+status.internal {
+	tls internal
+	reverse_proxy uptime-kuma:3001
+}
+
+# ---------------------------------------------------------------------------
+# Example: expose a service that runs natively on the host (not in Docker),
+# such as the Ollama API or a custom web app. OrbStack provides
+# host.docker.internal automatically.
+#
+# api.internal {
+# 	tls internal
+# 	reverse_proxy host.docker.internal:11434
+# }
+# ---------------------------------------------------------------------------

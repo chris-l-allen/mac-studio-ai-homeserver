@@ -1,0 +1,20 @@
+# macOS
+.DS_Store
+
+# Local environment / secrets
+.env
+
+# Logs
+*.log
+
+# Persistent container data (bind mounts)
+homepage/*
+!homepage/.gitkeep
+caddy/data/
+
+# Local model copies (weights belong in Ollama's own cache, not the repo)
+models/
+
+# Editor / tooling
+.idea/
+.vscode/
