@@ -33,6 +33,12 @@
     <key>WorkingDirectory</key>
     <string>/Users/callen/mac-studio-ai-homeserver</string>
 
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+
     <!-- seconds between runs: 6 hours -->
     <key>StartInterval</key>
     <integer>21600</integer>
