@@ -37,13 +37,13 @@ called over HTTP by other apps, not a chat window.
 |---|---|
 | **Machine** | Mac Studio (Apple Silicon, unified memory) |
 | **Value pick** | **M5 Max · 36 GB · 512 GB — $3,499 CAD** |
-| **Max-quality pick** | **Refurb M3 Ultra · 96 GB — ~$5,800 CAD** |
+| **Max-quality pick** | **Refurb M3 Ultra · 96 GB / 2 TB — $6,779 CAD** |
 | **Model** | **Qwen3.8-27B** — Apache-2.0, dense, multimodal, 262K context |
 | **Serving** | Ollama (native) → OpenAI-compatible API on `:11434` |
 | **Services** | Docker (OrbStack) behind Caddy |
 
-**The one open decision:** 27B on the $3,499 M5 Max, or 70B on the ~$5,800 refurb
-M3 Ultra. See [Open decisions](#open-decisions--roadmap).
+**The one open decision:** 27B on the $3,499 M5 Max, or 70B on the $6,779 refurb
+M3 Ultra (96 GB / 2 TB). See [Open decisions](#open-decisions--roadmap).
 
 ---
 
@@ -83,7 +83,7 @@ natively because containers on macOS cannot use the Metal GPU.
 
 | | New **M5 Max 36 GB** | Refurb **M3 Ultra 96 GB** |
 |---|---|---|
-| Price | **$3,499 CAD** *(verified)* | **~$5,800 CAD** (1 TB) *(tracker)* / $8,049 *(4 TB, verified)* |
+| Price | **$3,499 CAD** *(verified)* | **$6,779 CAD** (96 GB / 2 TB, 28c/60c) *(verified)* |
 | Unified memory | 36 GB | **96 GB** |
 | Memory bandwidth | ~546 GB/s class *(est.)* | **819 GB/s** *(verified)* |
 | CPU / GPU | 18-core / 32-core | 28-core / 60-core |
@@ -96,6 +96,10 @@ natively because containers on macOS cannot use the Metal GPU.
 > wider memory bus, it serves the *same* model ~1.4× faster than an M4 Max (546 GB/s)
 > or an M5 Max — despite being an older generation. LLM serving is memory-bandwidth
 > bound, not compute bound.
+>
+> Note: the M3 Ultra ships in **two tiers** (28-core/60-core and 32-core/80-core).
+> Both have the **same 819 GB/s** memory bandwidth, so for LLM serving the cheaper
+> 28/60 is the better value — the extra cores only help non-LLM GPU work.
 
 ### Pricing snapshot (Oct 2026, CAD)
 
@@ -106,10 +110,13 @@ planning. **Prices move — re-check before buying.**
 |---|---|---|
 | New M5 Max · 36 GB · 512 GB | **$3,499** | Apple CA; also `$158.23/mo × 24` |
 | New M5 Max · 36 GB (education) | **$3,219** | Requires UNiDAYS / post-secondary or school staff |
-| New M5 Max · 64 GB · ~1 TB | ~$4,000 *(est.)* | Only worth it for future 70B headroom |
-| New M5 Ultra · 96 GB · 1 TB | **$7,799** | Overkill for 27B |
-| Refurb M3 Ultra · 96 GB · 1 TB | **~$5,800** | Rotating stock; tracker ~$4,329 USD |
-| Refurb M3 Ultra · 96 GB · 4 TB | **$8,049** | Verified Apple CA listing — avoid the SSD premium |
+| New M5 Max · 48 GB · 1 TB | **$4,849** | Verified; 40-core GPU |
+| New M5 Max · 64 GB · 1 TB | **$5,449** | Verified; 40-core GPU |
+| New M5 Max · 128 GB · 1 TB | **$7,849** | Verified; beaten by M5 Ultra at $7,799 |
+| New M5 Ultra · 96 GB · 1 TB | **$7,799** | 1.2 TB/s; beats the $8,049 1 TB refurb |
+| Refurb M3 Ultra · 96 GB / 2 TB (28c/60c) | **$6,779** | Verified — **cheapest 96 GB** |
+| Refurb M3 Ultra · 96 GB / 1 TB (32c/80c) | **$8,049** | Verified — outclassed by M5 Ultra |
+| Refurb M3 Ultra · 96 GB / 4 TB (28c/60c) | **$8,049** | Verified — avoid the SSD premium |
 
 **Do not overpay for storage.** Model weights are ~17–70 GB; the 4 TB SSD on the
 refurb unit adds thousands of dollars you don't need. Buy 512 GB–1 TB.
@@ -333,8 +340,8 @@ at/below the goal.
 - Run it manually anytime: `python3 scripts/poll-hardware.py` (add `--commit` to push).
 - On a fresh **BUY**, it opens the listing in the default browser, plays a system
   sound, and speaks the alert via `say` (macOS).
-- The tracked M3 Ultra SKU (`G1CE9LL/A`) is the **96 GB / 4 TB** variant; add the
-  1 TB SKU to `targets.json` if/when you find it, since that's the cheaper config.
+- The watcher tracks the **96 GB / 2 TB (28c/60c, `G1CE4LL/A`)** and **96 GB /
+  1 TB (32c/80c, `G1CE1LL/A`)** refurb SKUs.
 
 > The poller reads each page's JSON-LD `Product`/`Offer` (authoritative per-SKU price
 > and availability), not the JavaScript configurator. It's still best-effort: Apple
@@ -344,7 +351,7 @@ at/below the goal.
 
 ## Open decisions / roadmap
 
-- [ ] **27B vs 70B:** M5 Max 36 GB ($3,499) or refurb M3 Ultra 96 GB (~$5,800)?
+- [ ] **27B vs 70B:** M5 Max 36 GB ($3,499) or refurb M3 Ultra 96 GB / 2 TB ($6,779)?
 - [ ] **Storage:** 512 GB vs 1 TB internal
 - [ ] **Reverse proxy:** Caddy (chosen) vs Traefik
 - [ ] **Remote access:** Tailscale vs WireGuard
@@ -369,8 +376,9 @@ A record of how the plan got here (kept for future-me):
 6. **Financing:** ~8% APR; paying cash.
 7. **Education pricing:** not eligible (kids are K-12; policy is post-secondary /
    school staff, UNiDAYS-verified).
-8. **Went to explore refurb:** M3 Ultra 96 GB (~819 GB/s) is the max-quality pick at
-   ~$5,800; the new M5 Max 36 GB is the value pick at $3,499.
+8. **Went to explore refurb:** M3 Ultra 96 GB (~819 GB/s) is the max-quality pick;
+   the cheapest 96 GB config is the 2 TB (28c/60c) at **$6,779**, while the 1 TB
+   (32c/80c) is $8,049 — actually outclassed by the M5 Ultra at $7,799.
 9. **New plan under consideration:** "huge RAM, unified, last-gen" → refurb M3 Ultra
    96 GB to reach the 70B dense tier.
 

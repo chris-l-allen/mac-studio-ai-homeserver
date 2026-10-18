@@ -1,44 +1,31 @@
 {
-  "checked_at": "2026-10-18 03:10 UTC",
+  "checked_at": "2026-10-18 13:16 UTC",
   "currency": "CAD",
   "results": [
     {
-      "id": "m3-ultra-96",
-      "label": "Refurb M3 Ultra 96 GB (28c/60c)",
-      "url": "https://www.apple.com/ca/shop/product/g1ce9ll/a/Refurbished-Mac-Studio-Apple-M3-Ultra-chip-with-28%E2%80%91Core-CPU-and-60%E2%80%91Core-GPU",
+      "id": "m3-ultra-96-2tb",
+      "label": "Refurb M3 Ultra 96 GB / 2 TB (28c/60c)",
+      "url": "https://www.apple.com/ca/shop/product/g1ce4ll/a/",
       "name": "Refurbished Mac Studio Apple M3 Ultra chip with 28‑Core CPU and 60‑Core GPU",
-      "sku": "G1CE9LL/A",
-      "target_cad": 5800,
+      "sku": "G1CE4LL/A",
+      "target_cad": 6800,
+      "price_cad": 6779.0,
+      "available": false,
+      "http_status": 200,
+      "at_or_below_target": true,
+      "state": "unavailable"
+    },
+    {
+      "id": "m3-ultra-96-1tb",
+      "label": "Refurb M3 Ultra 96 GB / 1 TB (32c/80c)",
+      "url": "https://www.apple.com/ca/shop/product/g1ce1ll/a/",
+      "name": "Refurbished Mac Studio Apple M3 Ultra chip with 32‑Core CPU and 80‑Core GPU",
+      "sku": "G1CE1LL/A",
+      "target_cad": 7400,
       "price_cad": 8049.0,
       "available": false,
       "http_status": 200,
       "at_or_below_target": false,
-      "state": "unavailable"
-    },
-    {
-      "id": "m4-max-16-40",
-      "label": "Refurb M4 Max 16c/40c",
-      "url": "https://www.apple.com/ca/shop/product/g1cd9ll/a/Refurbished-Mac-Studio-Apple-M4-Max-chip-with-16%E2%80%91Core-CPU-and-40%E2%80%91Core-GPU",
-      "name": "Refurbished Mac Studio Apple M4 Max chip with 16‑Core CPU and 40‑Core GPU",
-      "sku": "G1CD9LL/A",
-      "target_cad": 3600,
-      "price_cad": 5019.0,
-      "available": false,
-      "http_status": 200,
-      "at_or_below_target": false,
-      "state": "unavailable"
-    },
-    {
-      "id": "m4-max-14-32",
-      "label": "Refurb M4 Max 14c/32c",
-      "url": "https://www.apple.com/ca/shop/product/fu963ll/a/Refurbished-Mac-Studio-Apple-M4-Max-chip-with-14%E2%80%91Core-CPU-and-32%E2%80%91Core-GPU",
-      "name": "Refurbished Mac Studio Apple M4 Max chip with 14‑Core CPU and 32‑Core GPU",
-      "sku": "FU963LL/A",
-      "target_cad": 3300,
-      "price_cad": 2729.0,
-      "available": false,
-      "http_status": 200,
-      "at_or_below_target": true,
       "state": "unavailable"
     }
   ]

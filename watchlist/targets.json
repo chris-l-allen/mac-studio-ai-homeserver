@@ -2,22 +2,16 @@
   "currency": "CAD",
   "targets": [
     {
-      "id": "m3-ultra-96",
-      "label": "Refurb M3 Ultra 96 GB (28c/60c)",
-      "url": "https://www.apple.com/ca/shop/product/g1ce9ll/a/Refurbished-Mac-Studio-Apple-M3-Ultra-chip-with-28%E2%80%91Core-CPU-and-60%E2%80%91Core-GPU",
-      "target_cad": 5800
+      "id": "m3-ultra-96-2tb",
+      "label": "Refurb M3 Ultra 96 GB / 2 TB (28c/60c)",
+      "url": "https://www.apple.com/ca/shop/product/g1ce4ll/a/",
+      "target_cad": 6800
     },
     {
-      "id": "m4-max-16-40",
-      "label": "Refurb M4 Max 16c/40c",
-      "url": "https://www.apple.com/ca/shop/product/g1cd9ll/a/Refurbished-Mac-Studio-Apple-M4-Max-chip-with-16%E2%80%91Core-CPU-and-40%E2%80%91Core-GPU",
-      "target_cad": 3600
-    },
-    {
-      "id": "m4-max-14-32",
-      "label": "Refurb M4 Max 14c/32c",
-      "url": "https://www.apple.com/ca/shop/product/fu963ll/a/Refurbished-Mac-Studio-Apple-M4-Max-chip-with-14%E2%80%91Core-CPU-and-32%E2%80%91Core-GPU",
-      "target_cad": 3300
+      "id": "m3-ultra-96-1tb",
+      "label": "Refurb M3 Ultra 96 GB / 1 TB (32c/80c)",
+      "url": "https://www.apple.com/ca/shop/product/g1ce1ll/a/",
+      "target_cad": 7400
     }
   ]
 }
