@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-18 13:16 UTC",
+  "checked_at": "2026-10-20 13:06 UTC",
   "currency": "CAD",
   "results": [
     {
@@ -10,10 +10,10 @@
       "sku": "G1CE4LL/A",
       "target_cad": 6800,
       "price_cad": 6779.0,
-      "available": false,
+      "available": true,
       "http_status": 200,
       "at_or_below_target": true,
-      "state": "unavailable"
+      "state": "buy"
     },
     {
       "id": "m3-ultra-96-1tb",
@@ -23,10 +23,10 @@
       "sku": "G1CE1LL/A",
       "target_cad": 7400,
       "price_cad": 8049.0,
-      "available": false,
+      "available": true,
       "http_status": 200,
       "at_or_below_target": false,
-      "state": "unavailable"
+      "state": "in_stock"
     }
   ]
 }
