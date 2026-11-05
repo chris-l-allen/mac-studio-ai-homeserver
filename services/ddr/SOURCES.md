@@ -1,39 +1,27 @@
-# Sourced music (2026-11-05)
+# Sourced music (updated 2026-11-05)
 
-Files live under `songpacks/` and `media/` (both gitignored). This manifest is the
-committed record.
+Runtime files live under `songpacks/` (gitignored); this manifest is the committed
+record.
 
-## Step packs — `songpacks/`
+## Current playable library — 311 songs
 
-**Club Fantastic Seasons 1 & 2** — 32 songs, ~299 MB, beginner-to-advanced steps.
-Free and legal to play privately; music rights stay with the artists, art is
-CC BY-NC 4.0. Source: <https://clubfantastic.dance/>.
-
-```
-songpacks/Club Fantastic Season 1/   (16 songs)
-songpacks/Club Fantastic Season 2/   (16 songs)
-```
-
-## Media / sing-along — `media/`
-
-| File | Track | License |
+| Pack | Songs | Source |
 |---|---|---|
-| `childrens-music-and-rhymes.mp3` | Children's Music & Rhymes with Lyrics for Kids | CC0 1.0 |
-| `child-lullaby.mp3` | child lullaby | CC0 1.0 |
-| `mary-had-a-little-lamb.mp3` | Mary Had a Little Lamb (old radio feel) | CC0 1.0 |
-| `ring-around-the-rosie.mp3` | Ring Around the Rosie (child vocal) | CC0 1.0 |
-| `twinkle-twinkle.mp3` | Singing Twinkle Twinkle, Mr. Moon | CC0 1.0 |
-| `daisy-daisy.mp3` | Daisy Daisy | CC0 1.0 |
-| `nursery-rhyme.mp3` | Nursery Rhyme | CC BY 4.0 |
-| `music-box-g.mp3` | Music Box (G, 4/4, 60 BPM) | CC0 1.0 |
-| `happy-children.mp3` | Happy Children (Antti Luode) | CC BY 3.0 |
+| `Kids 50` | 50 | curated from DDR 1st Mix to EXTREME (≤135 BPM, kid-appropriate) |
+| `Dance Dance Revolution Disney Channel Edition (PS2)` | 20 | StepMania Online pack 9751 |
+| `Dance Dance Revolution Disney Grooves (Wii)` | 40 | StepMania Online pack 9752 |
+| `Stepmania Pop Hits Collection` | 201 | StepMania Online pack 8173 |
 
-Sources: Freesound (CC0/CC BY) and Wikimedia Commons (CC BY), via Openverse.
-Per-file URLs are in `media/SOURCES.json`.
+## Archived / removed
 
-## Playable library (curated 2026-11-05)
+- **Club Fantastic S1/S2, OutFox Serenity V1/V2, DDR 1st Mix to EXTREME** — parked
+  in `songpacks-archive/` (gitignored, recoverable). `Kids 50` came from the DDR set.
+- **DDR HOTTEST PARTY TIMELESS** — removed 2026-11-05.
+- **Media / sing-along** (9 tracks) — removed 2026-11-05.
 
-The game now shows only **`songpacks/Kids 50/`** — 50 classic-DDR tracks at ≤135
-BPM, kid-appropriate. The full Club Fantastic, Serenity, and DDR sets are parked in
-`songpacks-archive/` (gitignored) and can be restored any time. Purchased tracks
-(Danny Go etc.) get their own pack alongside `Kids 50`.
+## Notes
+
+- The community sources packs from **stepmaniaonline.net** (10,000+ packs, direct
+  download) and Zenius-I-Vanisher.
+- **No Danny Go pack exists** in the StepMania Online index; his tracks have to be
+  purchased and charted.
