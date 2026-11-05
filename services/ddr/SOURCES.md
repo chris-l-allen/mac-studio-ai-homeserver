@@ -3,30 +3,33 @@
 Runtime files live under `songpacks/` (gitignored); this manifest is the committed
 record.
 
-## Current playable library — 83 songs
+## Current playable library — 70 songs
 
 | Pack | Songs | Notes |
 |---|---|---|
-| `Dance Dance Revolution Disney Channel Edition (PS2)` | 20 | kid-friendly, kept whole |
-| `Dance Dance Revolution Disney Grooves (Wii)` | 40 | kid-friendly, kept whole |
-| `Stepmania Pop Hits Collection` | 23 | Beginner/Easy + BPM ≤105, age-5 + recognizability review |
+| `Dance Dance Revolution Disney Grooves (Wii)` | 21 | popular Disney classics |
+| `Dance Dance Revolution Disney Channel Edition (PS2)` | 6 | popular: BOP TO THE TOP, GET'CHA HEAD IN THE GAME, WE'RE ALL IN THIS TOGETHER, THE BEST OF BOTH WORLDS, CHEETAH SISTERS, THE PARTY'S JUST BEGUN |
+| `Stepmania Pop Hits Collection` | 43 | 23 kid-appropriate + 20 restored popular hits |
 
-## Removed 2026-11-05 (re-downloadable)
+### Restored popular pop (20)
 
-- **Kids 50** — 50 curated classic-DDR tracks
-- **Pop Hits trimmed out** — 147 tracks
-- **Age-5 content review** — Butterfly, Hotline Bling, I Feel It Coming, Love Me Like You Do, Turn Me On, Whistle, Work From Home, Worth It, Heathens (Chandelier kept)
-- **Slow/obscure review** — Beautiful Monster, Rude, Human, Thinking Out Loud, Dancing On My Own, Jealous, Locked Away, Alive, Charlie Brown, The Look, Hymn For The Weekend, Hello
-- **Club Fantastic S1/S2, OutFox Serenity V1/V2, DDR 1st Mix to EXTREME**
-- **DDR HOTTEST PARTY TIMELESS**
-- **Media / sing-along** (9 tracks)
+Shake It Off · Uptown Funk! · Can't Stop the Feeling · Let It Go · Counting Stars ·
+Sugar · Moves Like Jagger · Call Me Maybe · Gangnam Style · Good Time ·
+Good Feeling · Shut Up and Dance · HandClap · Applause · Bad Romance ·
+Just the Way You Are · Payphone · Get Lucky · Stronger (What Doesn't Kill You) ·
+All About That Bass
 
-The archive was purged to free 2.1 GB. Everything here can be re-downloaded from the
-sources above.
+## Removed
 
-## Notes
+- **Explicit / age-5:** Butterfly, Hotline Bling, I Feel It Coming, Love Me Like You
+  Do, Turn Me On, Whistle, Work From Home, Worth It, Heathens (Chandelier kept),
+  Fancy, Talk Dirty, The Hills, etc.
+- **Slow / obscure:** Beautiful Monster, Rude, Human, Thinking Out Loud, Dancing On
+  My Own, Jealous, Locked Away, Alive, Charlie Brown, The Look, Hymn For The
+  Weekend, Hello.
+- **Non-popular Disney:** 39 tracks from the two Disney packs.
+- **Bulk trim:** Kids 50 and the rest of the Pop Hits set.
 
-- Trim rule: Pop Hits keeps only songs with a Beginner/Easy `dance-single` chart
-  and median BPM ≤105; Disney packs are kept whole.
-- No Danny Go pack exists in the StepMania Online index; his tracks have to be
-  purchased and charted.
+All removed content is re-downloadable from StepMania Online / Club Fantastic /
+OutFox Serenity. No Danny Go pack exists in the index; his tracks must be purchased
+and charted.
