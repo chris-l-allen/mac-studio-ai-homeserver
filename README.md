@@ -46,7 +46,8 @@ called over HTTP by other apps, not a chat window.
 
 **Documentation:** [Objectives](docs/objectives.md) ·
 [Migration runbook](docs/migration.md) · [Network & `.allen`](docs/network.md) ·
-[Inference](docs/inference.md) · [DDR](docs/ddr.md)
+[Inference](docs/inference.md) · [DDR](docs/ddr.md) ·
+[all docs rendered](https://chris-l-allen.github.io/mac-studio-ai-homeserver/docs/)
 
 **Moving it to Rocinante:** see [docs/migration.md](docs/migration.md) and
 `scripts/migrate/`. The laptop is untouched until cutover and then becomes a client.
