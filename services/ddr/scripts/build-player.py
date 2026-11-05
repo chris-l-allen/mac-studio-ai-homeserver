@@ -35,14 +35,7 @@ def main() -> None:
             "pack": songdir.parent.name,
             "file": str(audio.relative_to(ROOT)),
         })
-    media_dir = ROOT / "media"
-    media_dir.mkdir(exist_ok=True)
-    for f in sorted(media_dir.glob("*.mp3")):
-        tracks.append({
-            "title": f.stem.replace("-", " ").title(),
-            "pack": "Media",
-            "file": str(f.relative_to(ROOT)),
-        })
+    # media/ was removed 2026-11-05; only step packs remain.
 
     payload = json.dumps(tracks, ensure_ascii=False)
     page = """<!doctype html>
@@ -111,7 +104,7 @@ a.onerror = () => { now.textContent = 'Could not play this file — try another.
 render();
 if (ALL.length) { load(0, false); now.textContent = 'Ready — click a track to play.'; }
 </script></body></html>"""
-    out = media_dir / "player.html"
+    out = ROOT / "player.html"
     out.write_text(page.replace("__PAYLOAD__", payload))
     print(f"wrote {out} ({len(tracks)} tracks)")
 

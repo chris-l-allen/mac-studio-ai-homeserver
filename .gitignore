@@ -22,6 +22,7 @@ services/network/data/
 services/ddr/songpacks/*
 !services/ddr/songpacks/.gitkeep
 services/ddr/songpacks-archive/
+services/ddr/player.html
 services/ddr/media/*
 !services/ddr/media/.gitkeep
 
