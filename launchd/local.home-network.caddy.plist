@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Caddy reverse proxy for every *.allen host.
+
+  Before loading:
+    1. Set LAN_IP to this server's static LAN address (used for the plain-HTTP
+       bootstrap site).
+    2. Issue certs for each host (portal UI -> /issue) and copy the leaf
+       cert/key into services/network/data/tls/<host>.crt|.key
+       (scripts/migrate/copy-certs.sh helps).
+
+  Install:
+    cp launchd/local.home-network.caddy.plist ~/Library/LaunchAgents/
+    launchctl load ~/Library/LaunchAgents/local.home-network.caddy.plist
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>local.home-network.caddy</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/caddy</string>
+        <string>run</string>
+        <string>--config</string>
+        <string>/Users/callen/mac-studio-ai-homeserver/caddy/Caddyfile</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/callen/mac-studio-ai-homeserver</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>/Users/callen</string>
+        <key>LAN_IP</key>
+        <string>10.0.0.11</string>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>ProcessType</key>
+    <string>Background</string>
+
+    <key>StandardOutPath</key>
+    <string>/Users/callen/mac-studio-ai-homeserver/services/network/data/caddy.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/callen/mac-studio-ai-homeserver/services/network/data/caddy.log</string>
+</dict>
+</plist>

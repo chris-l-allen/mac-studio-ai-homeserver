@@ -1,6 +1,8 @@
 {
   "currency": "CAD",
-  "targets": [
+  "_note": "Disarmed 2026-11-05 after choosing the new M5 Max 48GB/40-core. Refurb targets archived below; move one back into 'targets' to resume polling.",
+  "targets": [],
+  "_archived_targets": [
     {
       "id": "m3-ultra-96-2tb",
       "label": "Refurb M3 Ultra 96 GB / 2 TB (28c/60c)",

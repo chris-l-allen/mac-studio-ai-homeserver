@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Poker game backend (moonbeam-holdem). Lives in its own repo:
+    git clone https://github.com/chris-l-allen/moonbeam-holdem.git ~/workspace/poker-game
+  Published at https://poker.allen via Caddy.
+
+  Update PUBLIC_URL to the server's LAN IP (or https://poker.allen).
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.callen.holdem.agent</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/node</string>
+        <string>/Users/callen/workspace/poker-game/server.js</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/callen/workspace/poker-game</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>/Users/callen</string>
+        <key>HOST</key>
+        <string>0.0.0.0</string>
+        <key>PORT</key>
+        <string>8080</string>
+        <key>PUBLIC_URL</key>
+        <string>http://10.0.0.11:8080</string>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/holdem-lan.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/holdem-lan.log</string>
+</dict>
+</plist>

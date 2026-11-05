@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Home-network portal: .allen DNS (zone allen), private CA, device enrollment,
+  dashboard, and the .allen record/reservation API.
+
+  Install:
+    cp launchd/local.home-network.portal.plist ~/Library/LaunchAgents/
+    launchctl load ~/Library/LaunchAgents/local.home-network.portal.plist
+
+  DNS caveat: binding UDP :53 may need root on some macOS versions. If the log
+  shows "could not bind DNS port 53 ... using 5353", run this as a LaunchDaemon
+  (or replicate whatever the source Mac does). The portal still works on :5353.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>local.home-network.portal</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/python3</string>
+        <string>/Users/callen/mac-studio-ai-homeserver/services/network/server.py</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/callen/mac-studio-ai-homeserver/services/network</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>ProcessType</key>
+    <string>Background</string>
+
+    <key>StandardOutPath</key>
+    <string>/Users/callen/mac-studio-ai-homeserver/services/network/data/portal.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/callen/mac-studio-ai-homeserver/services/network/data/portal.log</string>
+</dict>
+</plist>

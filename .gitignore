@@ -15,6 +15,19 @@ caddy/data/
 # Local model copies (weights belong in Ollama's own cache, not the repo)
 models/
 
+# Secrets / runtime: CA keys, certs, portal state, DNS records
+services/network/data/
+
+# DDR content (large binaries; keep the directories)
+services/ddr/songpacks/*
+!services/ddr/songpacks/.gitkeep
+services/ddr/media/*
+!services/ddr/media/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+
 # Editor / tooling
 .idea/
 .vscode/

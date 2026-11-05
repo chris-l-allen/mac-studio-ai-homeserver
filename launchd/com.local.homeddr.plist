@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  DDR HomeServer: serves the song pack + media library on :8787.
+  Published to the LAN at https://ddr.allen via Caddy.
+
+  Install:
+    cp launchd/com.local.homeddr.plist ~/Library/LaunchAgents/
+    launchctl load ~/Library/LaunchAgents/com.local.homeddr.plist
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.local.homeddr</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/callen/mac-studio-ai-homeserver/services/ddr/scripts/serve.sh</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/callen/mac-studio-ai-homeserver/services/ddr</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOMEDDR_HOST</key>
+        <string>0.0.0.0</string>
+        <key>HOMEDDR_PORT</key>
+        <string>8787</string>
+        <key>HOMEDDR_ROOT</key>
+        <string>/Users/callen/mac-studio-ai-homeserver/services/ddr</string>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/callen/mac-studio-ai-homeserver/services/ddr/homeserver.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/callen/mac-studio-ai-homeserver/services/ddr/homeserver.err.log</string>
+</dict>
+</plist>

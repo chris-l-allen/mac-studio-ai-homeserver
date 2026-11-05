@@ -2,12 +2,14 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Platform: Apple Silicon](https://img.shields.io/badge/platform-Apple%20Silicon-black.svg)]()
-[![Status: planning](https://img.shields.io/badge/status-planning-yellow.svg)]()
+[![Status: building](https://img.shields.io/badge/status-building-yellow.svg)]()
 
-> A silent, always-on homelab on Apple Silicon that hosts internal web services
-> **and** serves a local LLM over an OpenAI-compatible API.
+> A silent, always-on homelab on Apple Silicon that hosts the whole house: every
+> `.allen` page, the network services, and a local LLM over an OpenAI-compatible API.
 
-**Status:** 🟡 Hardware selection / pre-build. Nothing here has been assembled yet.
+**Status:** 🟢 Hardware bought — **Rocinante** (new Apple Silicon Mac) arrives soon.
+DDR is folded in; scope is in [`docs/objectives.md`](docs/objectives.md) and the
+migration kit is in [`docs/migration.md`](docs/migration.md).
 
 **Rendered docs:** https://chris-l-allen.github.io/mac-studio-ai-homeserver/
 
@@ -15,19 +17,39 @@
 
 ## What this is
 
-One box that does two jobs:
+**Rocinante** is the one box that runs the whole house:
 
-1. **Host internal web pages & services** — dashboards, tools, and self-hosted apps,
-   published on the LAN through a reverse proxy.
-2. **Serve a local LLM** — **Qwen3.8-27B** (Apache-2.0) behind an
-   OpenAI-compatible `/v1/chat/completions` endpoint, so internal tools can call it
-   like any cloud model — no per-token bill, and no data leaving the house.
+1. **Every `.allen` page & network service** — the DNS authority for the `allen`
+   zone, a private CA + device enrollment, and a Caddy reverse proxy in front of
+   `homenetwork.allen`, `poker.allen`, `hypometer.allen`, and `ddr.allen`.
+2. **Local inference** — **Qwen3.8-27B** (Apache-2.0) behind an OpenAI-compatible
+   `/v1/chat/completions` endpoint, used by the Gmail→Calendar daemon and any other
+   sensitive job. No per-token bill, no data leaving the house.
+3. **The DDR station** — the HomeDDR song/media library (and Project OutFox),
+   folded in from the separate `home-ddr` project.
 
 Design priorities, in order: **quiet, cheap to run 24/7, enough unified memory for a
 27B model, and no ugly tower in the kids' homework space.**
 
 The whole point is the *server* framing: the model is a resident background service
 called over HTTP by other apps, not a chat window.
+
+## Services on the box
+
+| Host / unit | Service | Docs |
+|---|---|---|
+| `homenetwork.allen` | portal, DNS (`:53`), CA, enrollment | [network](docs/network.md) |
+| `poker.allen` | Moonbeam Hold'em (`:8080`) | — |
+| `hypometer.allen` | Leafs hypometer (`:8899`) | — |
+| `ddr.allen` | DDR song/media library (`:8787`) | [DDR](docs/ddr.md) |
+| `llm.allen` | Ollama / Qwen 27B (`:11434`) | [inference](docs/inference.md) |
+
+**Documentation:** [Objectives](docs/objectives.md) ·
+[Migration runbook](docs/migration.md) · [Network & `.allen`](docs/network.md) ·
+[Inference](docs/inference.md) · [DDR](docs/ddr.md)
+
+**Moving it to Rocinante:** see [docs/migration.md](docs/migration.md) and
+`scripts/migrate/`. The laptop is untouched until cutover and then becomes a client.
 
 ---
 
@@ -36,14 +58,23 @@ called over HTTP by other apps, not a chat window.
 | | |
 |---|---|
 | **Machine** | Mac Studio (Apple Silicon, unified memory) |
-| **Value pick** | **M5 Max · 36 GB · 512 GB — $3,499 CAD** |
-| **Max-quality pick** | **Refurb M3 Ultra · 96 GB / 2 TB — $6,779 CAD** |
+| **Constraint** | **48 GB RAM minimum** — optimize **form factor / CPU / GPU**; ignore storage & ethernet |
+| **Best 48 GB value** | **New M5 Max · 40-core GPU · 48 GB · 512 GB — $4,399 CAD** — 614 GB/s, minimal storage |
+| **Best overall value** | **New M5 Ultra · 96 GB · 1 TB — $7,799 CAD** — 1.2 TB/s, 70B-capable |
+| **Cheapest 48 GB** | Refurb Mac mini M4 Pro · 48 GB — **$2,839** (but only 273 GB/s) |
+| **Best refurb** | Refurb M3 Ultra · 96 GB / 2 TB — **$6,779** (819 GB/s) |
+| **Dominated — skip** | MacBook Pro M5 Max 48 GB ($5,949) — same 614 GB/s as the $4,399 Studio |
 | **Model** | **Qwen3.8-27B** — Apache-2.0, dense, multimodal, 262K context |
 | **Serving** | Ollama (native) → OpenAI-compatible API on `:11434` |
 | **Services** | Docker (OrbStack) behind Caddy |
 
-**The one open decision:** 27B on the $3,499 M5 Max, or 70B on the $6,779 refurb
-M3 Ultra (96 GB / 2 TB). See [Open decisions](#open-decisions--roadmap).
+**Constraint (2026-11-05):** 48 GB RAM is the floor; storage size and ethernet speed
+are noise, so ignore their cost. That leaves **form factor, CPU, and GPU** as the real
+variables. Because decode is memory-bandwidth-bound, form factor is essentially a
+bandwidth choice: the Mac mini is cheapest but only **273 GB/s**; the Mac Studio M5 Max
+gives **614 GB/s**; the M5 Ultra gives **1.2 TB/s**. Best value at 48 GB is the **M5 Max
+40-core / 48 GB / 512 GB at $4,399** (140 GB/s per $1,000); best overall is the **M5
+Ultra 96 GB at $7,799** (154). See [Inference per dollar](#inference-per-dollar).
 
 ---
 
@@ -54,7 +85,7 @@ M3 Ultra (96 GB / 2 TB). See [Open decisions](#open-decisions--roadmap).
 - [ ] Expose an **OpenAI-compatible API** to internal services
 - [ ] Run self-hosted apps in Docker behind a reverse proxy
 - [ ] Fit on a desk/shelf without looking like a gaming tower
-- [ ] Stay under ~$6,000 CAD
+- [ ] Stay under ~$8,000 CAD *(48 GB M5 Max $4,399; M5 Ultra $7,799)*
 
 **Non-goals:** model training/fine-tuning, running frontier MoE models (400B+; needs
 512 GB), gaming.
@@ -62,6 +93,10 @@ M3 Ultra (96 GB / 2 TB). See [Open decisions](#open-decisions--roadmap).
 ---
 
 ## Hardware decision
+
+> **Historical.** This section is the hardware-selection analysis, kept for the
+> record. The box is bought and named **Rocinante**; current scope lives in
+> [`docs/objectives.md`](docs/objectives.md).
 
 ### Why a Mac Studio (and not a GPU tower)
 
@@ -72,67 +107,113 @@ Silicon, the CPU, GPU, and Neural Engine share one high-bandwidth memory pool, s
 
 The GPU-tower route (used RTX 3090 → 24 GB) collapsed in 2026: an AI-driven memory
 shortage sent discrete GPU prices through the roof (see
-[price snapshot](#pricing-snapshot-oct-2026-cad)). A Mac Studio now delivers more
+[price snapshot](#pricing-snapshot-re-verified-2026-11-05-cad)). A Mac Studio now delivers more
 usable memory per dollar, idles at ~10–20 W, and is silent.
 
 **Big caveat:** macOS is a less natural self-hosting platform than Linux. Docker via
 OrbStack/Colima (or a small Linux VM) closes most of the gap; the LLM itself runs
 natively because containers on macOS cannot use the Metal GPU.
 
-### The two real options
+### The real options at ≥48 GB (prices/bandwidth verified 2026-11-05)
 
-| | New **M5 Max 36 GB** | Refurb **M3 Ultra 96 GB** |
-|---|---|---|
-| Price | **$3,499 CAD** *(verified)* | **$6,779 CAD** (96 GB / 2 TB, 28c/60c) *(verified)* |
-| Unified memory | 36 GB | **96 GB** |
-| Memory bandwidth | ~546 GB/s class *(est.)* | **819 GB/s** *(verified)* |
-| CPU / GPU | 18-core / 32-core | 28-core / 60-core |
-| What it runs | 27B at Q6/Q8 | 70B at Q4–Q8, or 27B at max context |
-| Relative TPS (same model) | baseline | ~1.4× faster |
-| Idle power | ~10–20 W | ~10–20 W |
-| Warranty | 1 yr (new) | 1 yr (Apple Certified Refurbished) |
+| Form factor | Chip (CPU / GPU) | RAM | Bandwidth | Cheapest config | GB/s per $1,000 |
+|---|---|---|---|---|---|
+| Mac mini (refurb) | M4 Pro 12c / 16c | 48 GB | 273 GB/s | **$2,839** (512 GB) | 96 |
+| Mac mini (refurb) | M4 Pro 14c / 20c | 48 GB | 273 GB/s | **$2,969** (512 GB) | 92 |
+| MacBook Pro 16" (refurb) | M5 Max 18c / 40c | 48 GB | 614 GB/s | **$5,949** (2 TB) | 103 |
+| Mac Studio (refurb) | M3 Ultra 28c / 60c | 96 GB | 819 GB/s | **$6,779** (2 TB) | 121 |
+| **Mac Studio (new)** | **M5 Max 18c / 40c** | **48 GB** | **614 GB/s** | **$4,399** (512 GB) | **140** |
+| **Mac Studio (new)** | **M5 Ultra 30c / 64c** | **96 GB** | **1,200 GB/s** | **$7,799** (1 TB) | **154** |
 
-> The M3 Ultra's **819 GB/s** is the key number: because the dual-die design has a
-> wider memory bus, it serves the *same* model ~1.4× faster than an M4 Max (546 GB/s)
-> or an M5 Max — despite being an older generation. LLM serving is memory-bandwidth
-> bound, not compute bound.
+> Storage and ethernet are taken at the cheapest variant and **ignored** — you said not
+> to spend on them. Each row is the cheapest listing for that chip/form factor.
 >
-> Note: the M3 Ultra ships in **two tiers** (28-core/60-core and 32-core/80-core).
-> Both have the **same 819 GB/s** memory bandwidth, so for LLM serving the cheaper
-> 28/60 is the better value — the extra cores only help non-LLM GPU work.
+> **Why the Mac mini is a false economy:** it is the cheapest 48 GB box, but M4 Pro
+> bandwidth is only **273 GB/s** — about **45% of the M5 Max (614)** and **23% of the
+> M5 Ultra (1.2 TB/s)**. For a resident LLM, bandwidth is the thing you are buying.
+>
+> **Why the MacBook Pro is dominated:** its 48 GB M5 Max 40-core is **$5,949** for the
+> same **614 GB/s** as the $4,399 Mac Studio. You are paying for the screen/battery,
+> not inference. Skip it for a server.
+>
+> **Bandwidth notes (Apple specs):** M4 Pro = 273 GB/s; M3 Ultra = 819 GB/s; M5 Max
+> 32c = 460 GB/s, 40c = 614 GB/s; M5 Ultra = 1.2 TB/s. The old "~546 GB/s" M5 figure
+> was wrong and is gone.
 
-### Pricing snapshot (Oct 2026, CAD)
+### Inference per dollar
 
-Verified figures came from Apple's Canadian store and third-party trackers during
-planning. **Prices move — re-check before buying.**
+Decode is memory-bandwidth-bound: each generated token reads the model weights once,
+so tokens/sec scales with memory bandwidth for a fixed model and quantization. That
+makes **GB/s per dollar** a fair, model-agnostic proxy for inference value.
+
+| Option | Price | Bandwidth | GB/s per $1,000 | Est. 27B Q6 tok/s | Index |
+|---|---|---|---|---|---|
+| Refurb Mac mini M4 Pro 48 GB (16c GPU) | $2,839 | 273 GB/s | 96 | ~12 | 69 |
+| Refurb Mac mini M4 Pro 48 GB (20c GPU) | $2,969 | 273 GB/s | 92 | ~12 | 66 |
+| Refurb MacBook Pro M5 Max 48 GB | $5,949 | 614 GB/s | 103 | ~28 | 74 |
+| Refurb M3 Ultra 96 GB | $6,779 | 819 GB/s | 121 | ~37 | 87 |
+| **New M5 Max 48 GB (40c)** | **$4,399** | **614 GB/s** | **140** | **~28** | **100** |
+| **New M5 Ultra 96 GB** | **$7,799** | **1,200 GB/s** | **154** | **~55** | **110** |
+
+*Est. tok/s = bandwidth ÷ ~22 GB (27B Q6) — theoretical ceiling; ratios hold. Index is
+normalized to the M5 Max 48 GB = 100 (the 36 GB is below the 48 GB floor).*
+
+**Reading the table**
+
+- **Best value at the 48 GB floor: new M5 Max 40-core / 48 GB / 512 GB — $4,399**
+  (index 100). Meets the floor, gives 614 GB/s, smallest storage — exactly the brief
+  (no storage/ethernet premium).
+- **Best value overall: new M5 Ultra 96 GB — $7,799** (index 110). 1.2 TB/s and 70B
+  capable. Costs $3,400 more, but it is the highest inference-per-dollar and the only
+  sensible step up.
+- **The Mac mini is the cheap 48 GB trap (index 66–69).** $2,839 sounds great until
+  you see 273 GB/s: it is the *worst* inference-per-dollar here despite the low price.
+- **The MacBook Pro is dominated** (index 74): same 614 GB/s as the $4,399 Mac Studio
+  for $1,550 more. Form factor, not inference.
+- **The refurb M3 Ultra (index 87)** is the best *refurb* Mac Studio, but it is worse
+  value than both new Mac Studios and is stuck with a 2 TB SSD you don't want.
+
+**Value frontier:** new M5 Max 48 GB ($4,399, best at the floor) → M5 Ultra 96 GB
+($7,799, best overall). Everything else is slower per dollar (Mac mini), dominated
+(MacBook Pro), or a worse-value refurb (M3 Ultra).
+
+### Pricing snapshot (re-verified 2026-11-05, CAD)
+
+Verified figures came from Apple's Canadian store in this session. **Prices move —
+re-check before buying.**
 
 | Configuration | Price (CAD) | Note |
 |---|---|---|
-| New M5 Max · 36 GB · 512 GB | **$3,499** | Apple CA; also `$158.23/mo × 24` |
-| New M5 Max · 36 GB (education) | **$3,219** | Requires UNiDAYS / post-secondary or school staff |
-| New M5 Max · 48 GB · 1 TB | **$4,849** | Verified; 40-core GPU |
-| New M5 Max · 64 GB · 1 TB | **$5,449** | Verified; 40-core GPU |
-| New M5 Max · 128 GB · 1 TB | **$7,849** | Verified; beaten by M5 Ultra at $7,799 |
-| New M5 Ultra · 96 GB · 1 TB | **$7,799** | 1.2 TB/s; beats the $8,049 1 TB refurb |
-| Refurb M3 Ultra · 96 GB / 2 TB (28c/60c) | **$6,779** | Verified — **cheapest 96 GB** |
-| Refurb M3 Ultra · 96 GB / 1 TB (32c/80c) | **$8,049** | Verified — outclassed by M5 Ultra |
-| Refurb M3 Ultra · 96 GB / 4 TB (28c/60c) | **$8,049** | Verified — avoid the SSD premium |
+| New M5 Max · 48 GB · 512 GB · 40c GPU | **$4,399** | 614 GB/s; 48 GB floor; **best 48 GB value** |
+| New M5 Max · 64 GB · 512 GB · 40c GPU | **$4,999** | 614 GB/s; +16 GB capacity only |
+| New M5 Max · 64 GB · 1 TB · 40c GPU | **$5,449** | 614 GB/s |
+| New M5 Max · 128 GB · 1 TB · 40c GPU | **$7,849** | 614 GB/s; beaten by M5 Ultra at $7,799 |
+| New M5 Ultra · 96 GB · 1 TB | **$7,799** | 1.2 TB/s; **best overall value** |
+| Refurb Mac mini · M4 Pro · 48 GB · 512 GB | **$2,839** | 273 GB/s; cheapest ≥48 GB, but slow |
+| Refurb MacBook Pro 16" · M5 Max 40c · 48 GB · 2 TB | **$5,949** | 614 GB/s; dominated by the $4,399 Studio |
+| Refurb M3 Ultra · 96 GB / 2 TB (28c/60c) | **$6,779** | 819 GB/s; best refurb, worse value than new |
+| Refurb M3 Ultra · 96 GB / 1 TB (32c/80c) | **$8,049** | 819 GB/s; outclassed by M5 Ultra |
+| Refurb M3 Ultra · 96 GB / 4 TB (28c/60c) | **$8,049** | 819 GB/s; avoid the SSD premium |
 
-**Do not overpay for storage.** Model weights are ~17–70 GB; the 4 TB SSD on the
-refurb unit adds thousands of dollars you don't need. Buy 512 GB–1 TB.
+**Do not overpay for storage or ethernet.** Take the smallest storage that clears the
+48 GB floor; 512 GB holds the 27B quants (17–70 GB each) comfortably. Gigabit ethernet
+is enough — 10GbE adds cost for no inference benefit here.
 
 ### CPU / GPU / memory: what actually matters
 
 - **CPU:** effectively fixed on the M5 Max (18-core in both SKUs). It is *not* the
   LLM bottleneck — 18 cores is already overkill for a home server.
-- **GPU:** 32- vs 40-core is the real difference between the two M5 Max SKUs, but it
-  barely matters for inference (bandwidth-bound). Small benefit for non-LLM GPU work.
-- **Memory *capacity*:** does **not** increase tokens/sec. Bandwidth is fixed per
-  chip tier; 36/64/128 GB all run at the same speed. More RAM buys *capacity*:
-  bigger KV cache, higher quantization, or larger models. 64 GB does **not** make a
-  27B faster than 36 GB.
-- **Memory *bandwidth*:** this is the lever for tokens/sec, and it's set by the chip
-  tier (Max vs Ultra), not by how much RAM you buy.
+- **GPU:** 32- vs 40-core *does* matter on the M5 Max — the 40-core GPU has a wider
+  memory bus (**614 vs 460 GB/s**), making it ~33% faster at inference. Core count
+  itself is not the bottleneck; the bandwidth it buys is.
+- **Memory *capacity*:** does **not** increase tokens/sec at a fixed GPU tier. More
+  RAM buys *capacity*: bigger KV cache, higher quantization, or larger models. 64 GB
+  does **not** make a 27B faster than 36 GB *on the same GPU*.
+- **Memory *bandwidth*:** this is the lever for tokens/sec. It is set by the **chip
+  and GPU-core tier**, not by how much RAM you buy: M5 Max 32-core GPU = 460 GB/s,
+  M5 Max 40-core GPU = 614 GB/s, M3 Ultra = 819 GB/s, M5 Ultra = 1.2 TB/s. Want more
+  speed on the M5 Max? You must take the 40-core GPU (which brings the 48 GB floor) —
+  adding RAM to the 32-core GPU does nothing.
 
 ### Finance vs cash
 
@@ -168,7 +249,7 @@ verification and the old honor-system loophole is closed.
 | **Q6** | **~21–22 GB** | **36 GB unified ✅ (recommended)** |
 | Q4 | ~15–17 GB | 24 GB GPU |
 
-### If you go to 96 GB (M3 Ultra)
+### If you go to 96 GB (M3 Ultra or M5 Ultra)
 
 You unlock the **70B dense tier**:
 - **DeepSeek-R1-Distill-70B** — best local reasoning at this size
@@ -328,20 +409,14 @@ input works but is heavy — treat it as out-of-scope for 24/7 serving.
 
 ## Hardware watchlist (automated)
 
-`launchd/com.local.hardware-watch.plist` runs `scripts/poll-hardware.py --commit`
-**every 6 hours on the always-on Mac Studio**, checks the target refurb listings, and
-commits an updated `watchlist/latest.json` + `watchlist/README.md` when anything
-changes. A row flagged **BUY** means the SKU is *in stock* and its listed price is
-at/below the goal.
+**Disarmed 2026-11-05** after the purchase. `watchlist/targets.json` has an empty
+`targets` list; the two original refurb targets are kept under `_archived_targets`.
+Move one back into `targets` to resume.
 
-- Install the schedule:
-  `cp launchd/com.local.hardware-watch.plist ~/Library/LaunchAgents/ && launchctl load ~/Library/LaunchAgents/com.local.hardware-watch.plist`
-- Change what to watch and the goal prices in **`watchlist/targets.json`**.
-- Run it manually anytime: `python3 scripts/poll-hardware.py` (add `--commit` to push).
-- On a fresh **BUY**, it opens the listing in the default browser, plays a system
-  sound, and speaks the alert via `say` (macOS).
-- The watcher tracks the **96 GB / 2 TB (28c/60c, `G1CE4LL/A`)** and **96 GB /
-  1 TB (32c/80c, `G1CE1LL/A`)** refurb SKUs.
+- `launchd/com.local.hardware-watch.plist` runs `scripts/poll-hardware.py --commit`
+  every 6 hours (install it on Rocinante once the box is up).
+- Run manually: `python3 scripts/poll-hardware.py` (add `--commit` to push).
+- Re-arm by editing **`watchlist/targets.json`**.
 
 > The poller reads each page's JSON-LD `Product`/`Offer` (authoritative per-SKU price
 > and availability), not the JavaScript configurator. It's still best-effort: Apple
@@ -351,8 +426,10 @@ at/below the goal.
 
 ## Open decisions / roadmap
 
-- [ ] **27B vs 70B:** M5 Max 36 GB ($3,499) or refurb M3 Ultra 96 GB / 2 TB ($6,779)?
-- [ ] **Storage:** 512 GB vs 1 TB internal
+- [x] **Hardware — bought:** **Rocinante** (new Apple Silicon Mac; confirm config at
+  hand-off). See [`docs/objectives.md`](docs/objectives.md).
+- [x] **Form factor:** Apple Silicon Mac (Rocinante).
+- [x] **Storage/ethernet:** cheapest config; no storage/ethernet premium.
 - [ ] **Reverse proxy:** Caddy (chosen) vs Traefik
 - [ ] **Remote access:** Tailscale vs WireGuard
 - [ ] **Backups:** Time Machine + offsite, or restic to an external disk
@@ -381,17 +458,44 @@ A record of how the plan got here (kept for future-me):
    (32c/80c) is $8,049 — actually outclassed by the M5 Ultra at $7,799.
 9. **New plan under consideration:** "huge RAM, unified, last-gen" → refurb M3 Ultra
    96 GB to reach the 70B dense tier.
+10. **Re-verified prices and bandwidth (2026-11-05).** Apple CA lists the M5 Max
+    18c/32c at **460 GB/s**, the 18c/40c at **614 GB/s**, the M5 Ultra at **1.2 TB/s**,
+    and the M5 Ultra 96 GB / 1 TB at **$7,799**; the refurb M3 Ultra 96 GB / 2 TB is
+    still **$6,779** and in stock. Corrected the old "~546 GB/s *(est.)*" figure — the
+    M5 Max was never 546 GB/s.
+11. **Ran the value math.** GB/s per $1,000: M5 Ultra **154 (best)**, M5 Max 40c 140,
+    M5 Max 32c 131, refurb M3 Ultra **121 (worst)**. The refurb is the cheapest 70B
+    box, not the best value. Dropped it from contention.
+12. **Reframed the decision (2026-11-05): 48 GB is the floor, storage/ethernet are
+    noise.** Optimize form factor/CPU/GPU instead. Pulled every ≥48 GB refurb listing:
+    Mac mini M4 Pro 48 GB from **$2,839** (273 GB/s), MacBook Pro M5 Max 48 GB
+    **$5,949** (614 GB/s), Mac Studio M3 Ultra 96 GB **$6,779** (819 GB/s). The Mac mini
+    is cheapest but indexes 66–69; the MacBook Pro is dominated; the M3 Ultra is the
+    best refurb but worse value than new.
+13. **Value result:** new **M5 Max 40-core 48 GB / 512 GB ($4,399, index 100)** is the
+    best 48 GB value; new **M5 Ultra 96 GB ($7,799, index 110)** is the best overall.
+    The Mac mini's 273 GB/s makes it the worst inference-per-dollar despite being the
+    cheapest.
+14. **Named the box Rocinante (2026-11-05).** The current Mac is the personal laptop;
+    it and every other device become consumers of Rocinante's services.
+15. **Collapsed HomeDDR into this repo (2026-11-05).** Code lives under `services/ddr/`,
+    docs under `docs/ddr*.md`; the original README, HANDOFF, AGENTS, and LICENSE are
+    preserved under `services/ddr/`.
+16. **Folded the .allen network stack in (2026-11-05).** Portal/DNS/CA under
+    `services/network/`, one Caddyfile for every `.allen` host, and a migration kit in
+    `scripts/migrate/` + `docs/migration.md`.
 
 ---
 
 ## Evidence & sources
 
 Labels used above: *(verified)* = read directly from a primary source during planning;
-*(est.)* = inferred, not directly confirmed. Prices are a **snapshot (Oct 2026)** and
-change frequently.
+*(inferred)* = follows from the numbers but was not measured. Prices and bandwidth were
+**re-verified 2026-11-05** and still change frequently.
 
 - Qwen3.8-27B model card — <https://huggingface.co/Qwen/Qwen3.8-27B>
 - Apple Canada — new Mac Studio: <https://www.apple.com/ca/shop/buy-mac/mac-studio>
+- Apple Canada — Mac Studio tech specs (bandwidth): <https://www.apple.com/ca/mac-studio/specs/>
 - Apple Canada — refurbished Mac: <https://www.apple.com/ca/shop/refurbished/mac>
 - GPU street prices (Oct 2026) — Tom's Hardware price index:
   <https://www.tomshardware.com/pc-components/gpus/lowest-gpu-prices-tracking>

@@ -1,34 +1,78 @@
-# Internal reverse proxy.
+# Unified .allen reverse proxy for the home server.
 #
-# "tls internal" issues a locally-trusted cert from Caddy's own CA, so you get
-# HTTPS on the LAN without exposing anything to the public internet. Trust the
-# root cert on your devices: it lives in the container's data volume.
+# Every host below is LAN-only: the `allen` DNS zone is served by the portal
+# (services/network/server.py). Nothing is exposed to the public internet.
 #
-# Resolve *.internal via your router or a local DNS entry (e.g. Pi-hole).
-
+# Paths use {$HOME}; launchd sets HOME=/Users/<you> for the Caddy unit.
+# Set LAN_IP in the launchd plist to this server's static LAN address.
 {
-	# email admin@example.internal
+	log {
+		output file {$HOME}/mac-studio-ai-homeserver/services/network/data/access.log
+		format json
+	}
+	# Disable HTTP/3 (QUIC): some clients fail on UDP:443 and don't fall back.
+	servers {
+		protocols h1 h2
+	}
 }
 
-# Dashboard
-homepage.internal {
-	tls internal
-	reverse_proxy homepage:3000
+# --- .allen pages ---------------------------------------------------------
+
+# Poker game (node, plain HTTP backend)
+poker.allen {
+	tls {$HOME}/mac-studio-ai-homeserver/services/network/data/tls/poker.allen.crt {$HOME}/mac-studio-ai-homeserver/services/network/data/tls/poker.allen.key
+	reverse_proxy 127.0.0.1:8080
 }
 
-# Uptime monitor
-status.internal {
-	tls internal
-	reverse_proxy uptime-kuma:3001
+# Home network portal (HTTPS backend on :8443)
+homenetwork.allen {
+	tls {$HOME}/mac-studio-ai-homeserver/services/network/data/tls/homenetwork.allen.crt {$HOME}/mac-studio-ai-homeserver/services/network/data/tls/homenetwork.allen.key
+
+	handle /set-dns.command {
+		root * {$HOME}/mac-studio-ai-homeserver/services/network
+		file_server
+	}
+	handle {
+		reverse_proxy https://127.0.0.1:8443 {
+			transport http {
+				tls_insecure_skip_verify
+			}
+		}
+	}
 }
 
-# ---------------------------------------------------------------------------
-# Example: expose a service that runs natively on the host (not in Docker),
-# such as the Ollama API or a custom web app. OrbStack provides
-# host.docker.internal automatically.
-#
-# api.internal {
-# 	tls internal
-# 	reverse_proxy host.docker.internal:11434
-# }
-# ---------------------------------------------------------------------------
+# Leafs hypometer (plain HTTP :8899)
+hypometer.allen {
+	tls {$HOME}/mac-studio-ai-homeserver/services/network/data/tls/hypometer.allen.crt {$HOME}/mac-studio-ai-homeserver/services/network/data/tls/hypometer.allen.key
+	reverse_proxy 127.0.0.1:8899
+}
+
+# DDR song/media library (plain HTTP :8787)
+ddr.allen {
+	tls {$HOME}/mac-studio-ai-homeserver/services/network/data/tls/ddr.allen.crt {$HOME}/mac-studio-ai-homeserver/services/network/data/tls/ddr.allen.key
+	reverse_proxy 127.0.0.1:8787
+}
+
+# --- Inference ------------------------------------------------------------
+
+# Ollama's OpenAI-compatible API (Qwen 27B). LAN-only.
+# Clients: base_url = http://llm.allen/v1 (after DNS + CA trust), or
+#          http://<server-ip>:11434/v1 directly.
+llm.allen {
+	tls {$HOME}/mac-studio-ai-homeserver/services/network/data/tls/llm.allen.crt {$HOME}/mac-studio-ai-homeserver/services/network/data/tls/llm.allen.key
+	reverse_proxy 127.0.0.1:11434
+}
+
+# --- Plain-HTTP bootstrap -------------------------------------------------
+# Devices cannot resolve *.allen until they use the portal DNS. This serves the
+# one-click DNS helper and proxies enrollment/install paths to the portal's
+# plain-HTTP listener on :8081.
+http://{$LAN_IP} {
+	handle /set-dns.command {
+		root * {$HOME}/mac-studio-ai-homeserver/services/network
+		file_server
+	}
+	handle {
+		reverse_proxy 127.0.0.1:8081
+	}
+}

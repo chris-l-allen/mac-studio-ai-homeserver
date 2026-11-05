@@ -9,22 +9,13 @@
 # ---------------------------------------------------------------------------
 name: homelab
 
-services:
-  # Reverse proxy: internal TLS + routing for *.internal
-  caddy:
-    image: caddy:2
-    container_name: caddy
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    networks:
-      - lan
+# NOTE: Caddy is NOT a container here. The .allen stack needs native Caddy (it
+# reads the portal-issued certs from disk and owns :80/:443). Run it with:
+#   caddy run --config caddy/Caddyfile
+# or the launchd unit launchd/local.home-network.caddy.plist.
+# This compose file is only for the optional containerized extras below.
 
+services:
   # Landing page / dashboard for all services
   homepage:
     image: ghcr.io/gethomepage/homepage:latest
@@ -55,6 +46,4 @@ networks:
     driver: bridge
 
 volumes:
-  caddy_data:
-  caddy_config:
   uptime_data:

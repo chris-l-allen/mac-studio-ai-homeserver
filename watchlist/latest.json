@@ -1,32 +1,5 @@
 {
-  "checked_at": "2026-11-05 16:19 UTC",
+  "checked_at": "2026-11-05 19:45 UTC",
   "currency": "CAD",
-  "results": [
-    {
-      "id": "m3-ultra-96-2tb",
-      "label": "Refurb M3 Ultra 96 GB / 2 TB (28c/60c)",
-      "url": "https://www.apple.com/ca/shop/product/g1ce4ll/a/",
-      "name": "Refurbished Mac Studio Apple M3 Ultra chip with 28‑Core CPU and 60‑Core GPU",
-      "sku": "G1CE4LL/A",
-      "target_cad": 6800,
-      "price_cad": 6779.0,
-      "available": true,
-      "http_status": 200,
-      "at_or_below_target": true,
-      "state": "buy"
-    },
-    {
-      "id": "m3-ultra-96-1tb",
-      "label": "Refurb M3 Ultra 96 GB / 1 TB (32c/80c)",
-      "url": "https://www.apple.com/ca/shop/product/g1ce1ll/a/",
-      "name": "Refurbished Mac Studio Apple M3 Ultra chip with 32‑Core CPU and 80‑Core GPU",
-      "sku": "G1CE1LL/A",
-      "target_cad": 7400,
-      "price_cad": 8049.0,
-      "available": false,
-      "http_status": 200,
-      "at_or_below_target": false,
-      "state": "unavailable"
-    }
-  ]
+  "results": []
 }

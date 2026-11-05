@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Gmail -> Calendar daemon, now using LOCAL inference (no cloud API key).
+
+  The app lives outside this repo at ~/gmail-events. Copy it over during
+  migration, including credentials.json and token.json (both secret).
+
+  This plist intentionally contains NO API key. Set LLM_PROVIDER=ollama so the
+  OpenAI client in classifier.js talks to Qwen 27B on this server.
+
+  Install:
+    cp launchd/com.gmail-events.daemon.plist ~/Library/LaunchAgents/
+    launchctl load ~/Library/LaunchAgents/com.gmail-events.daemon.plist
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.gmail-events.daemon</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/node</string>
+        <string>/Users/callen/gmail-events/index.js</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/callen/gmail-events</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>LLM_PROVIDER</key>
+        <string>ollama</string>
+        <key>OLLAMA_BASE_URL</key>
+        <string>http://127.0.0.1:11434/v1</string>
+        <key>OLLAMA_MODEL</key>
+        <string>hf.co/unsloth/Qwen3.8-27B-GGUF:Q6_K</string>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin</string>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/callen/gmail-events/daemon.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/callen/gmail-events/daemon.err</string>
+</dict>
+</plist>
