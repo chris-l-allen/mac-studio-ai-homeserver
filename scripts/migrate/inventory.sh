@@ -8,8 +8,8 @@ OLD_HOME="${OLD_HOME:-$HOME}"
 echo "== Runtime data (contains secrets — never commit) =="
 for p in \
   "$OLD_HOME/home-network/data" \
-  "$OLD_HOME/home-ddr/songpacks" \
-  "$OLD_HOME/home-ddr/media" \
+  "$OLD_HOME/mac-studio-ai-homeserver/services/ddr/songpacks" \
+  "$OLD_HOME/mac-studio-ai-homeserver/services/ddr/media" \
   "$OLD_HOME/gmail-events/credentials.json" \
   "$OLD_HOME/gmail-events/token.json" \
   "$OLD_HOME/gmail-events/.env" \

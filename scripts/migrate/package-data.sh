@@ -21,8 +21,8 @@ EOF
 
 tar -czf "$OUT" -C "$OLD_HOME" \
   home-network/data \
-  home-ddr/songpacks \
-  home-ddr/media \
+  mac-studio-ai-homeserver/services/ddr/songpacks \
+  mac-studio-ai-homeserver/services/ddr/media \
   gmail-events/credentials.json \
   gmail-events/token.json \
   gmail-events/.env \

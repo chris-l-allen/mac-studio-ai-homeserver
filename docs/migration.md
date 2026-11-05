@@ -77,9 +77,9 @@ Notes:
    # from the tarball created in §1
    mkdir -p services/network services/ddr
    tar -xzf ~/Desktop/homelab-migration-*.tar.gz -C "$HOME"
-   rsync -a ~/home-network/data/  services/network/data/
-   rsync -a ~/home-ddr/songpacks/ services/ddr/songpacks/
-   rsync -a ~/home-ddr/media/     services/ddr/media/
+   rsync -a ~/home-network/data/ services/network/data/
+   # the tarball also restores services/ddr/{songpacks,media} into the repo,
+   # overwriting the empty dirs a fresh clone creates
    # gmail-events and leafs-hypometer stay at ~/gmail-events and ~/leafs-hypometer
    ```
 
