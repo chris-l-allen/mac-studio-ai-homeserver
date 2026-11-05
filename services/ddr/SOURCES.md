@@ -3,25 +3,25 @@
 Runtime files live under `songpacks/` (gitignored); this manifest is the committed
 record.
 
-## Current playable library — 311 songs
+## Current playable library — 104 songs
 
-| Pack | Songs | Source |
+| Pack | Songs | Notes |
 |---|---|---|
-| `Kids 50` | 50 | curated from DDR 1st Mix to EXTREME (≤135 BPM, kid-appropriate) |
-| `Dance Dance Revolution Disney Channel Edition (PS2)` | 20 | StepMania Online pack 9751 |
-| `Dance Dance Revolution Disney Grooves (Wii)` | 40 | StepMania Online pack 9752 |
-| `Stepmania Pop Hits Collection` | 201 | StepMania Online pack 8173 |
+| `Dance Dance Revolution Disney Channel Edition (PS2)` | 20 | kid-friendly, kept whole |
+| `Dance Dance Revolution Disney Grooves (Wii)` | 40 | kid-friendly, kept whole |
+| `Stepmania Pop Hits Collection` | 44 | trimmed to Beginner/Easy + median BPM ≤105 |
 
-## Archived / removed
+## Archived (`songpacks-archive/`, gitignored, recoverable)
 
-- **Club Fantastic S1/S2, OutFox Serenity V1/V2, DDR 1st Mix to EXTREME** — parked
-  in `songpacks-archive/` (gitignored, recoverable). `Kids 50` came from the DDR set.
-- **DDR HOTTEST PARTY TIMELESS** — removed 2026-11-05.
-- **Media / sing-along** (9 tracks) — removed 2026-11-05.
+- **Kids 50** — 50 curated classic-DDR tracks (removed from playable 2026-11-05)
+- **Pop Hits trimmed out** — 147 tracks
+- **Club Fantastic S1/S2, OutFox Serenity V1/V2, DDR 1st Mix to EXTREME**
+- **DDR HOTTEST PARTY TIMELESS** — removed
+- **Media / sing-along** (9 tracks) — removed
 
 ## Notes
 
-- The community sources packs from **stepmaniaonline.net** (10,000+ packs, direct
-  download) and Zenius-I-Vanisher.
-- **No Danny Go pack exists** in the StepMania Online index; his tracks have to be
+- Trim rule: Pop Hits keeps only songs with a Beginner/Easy `dance-single` chart
+  and median BPM ≤105; Disney packs are kept whole.
+- No Danny Go pack exists in the StepMania Online index; his tracks have to be
   purchased and charted.
