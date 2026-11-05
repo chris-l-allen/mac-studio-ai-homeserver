@@ -11,13 +11,16 @@ record.
 | `Dance Dance Revolution Disney Grooves (Wii)` | 40 | kid-friendly, kept whole |
 | `Stepmania Pop Hits Collection` | 44 | trimmed to Beginner/Easy + median BPM ≤105 |
 
-## Archived (`songpacks-archive/`, gitignored, recoverable)
+## Removed 2026-11-05 (re-downloadable)
 
-- **Kids 50** — 50 curated classic-DDR tracks (removed from playable 2026-11-05)
+- **Kids 50** — 50 curated classic-DDR tracks
 - **Pop Hits trimmed out** — 147 tracks
 - **Club Fantastic S1/S2, OutFox Serenity V1/V2, DDR 1st Mix to EXTREME**
-- **DDR HOTTEST PARTY TIMELESS** — removed
-- **Media / sing-along** (9 tracks) — removed
+- **DDR HOTTEST PARTY TIMELESS**
+- **Media / sing-along** (9 tracks)
+
+The archive was purged to free 2.1 GB. Everything here can be re-downloaded from the
+sources above.
 
 ## Notes
 
