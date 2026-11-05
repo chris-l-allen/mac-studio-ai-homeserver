@@ -3,18 +3,19 @@
 Runtime files live under `songpacks/` (gitignored); this manifest is the committed
 record.
 
-## Current playable library — 104 songs
+## Current playable library — 95 songs
 
 | Pack | Songs | Notes |
 |---|---|---|
 | `Dance Dance Revolution Disney Channel Edition (PS2)` | 20 | kid-friendly, kept whole |
 | `Dance Dance Revolution Disney Grooves (Wii)` | 40 | kid-friendly, kept whole |
-| `Stepmania Pop Hits Collection` | 44 | trimmed to Beginner/Easy + median BPM ≤105 |
+| `Stepmania Pop Hits Collection` | 35 | trimmed to Beginner/Easy + median BPM ≤105, age-5 content review |
 
 ## Removed 2026-11-05 (re-downloadable)
 
 - **Kids 50** — 50 curated classic-DDR tracks
 - **Pop Hits trimmed out** — 147 tracks
+- **Age-5 content review** — Butterfly, Hotline Bling, I Feel It Coming, Love Me Like You Do, Turn Me On, Whistle, Work From Home, Worth It, Heathens (Chandelier kept)
 - **Club Fantastic S1/S2, OutFox Serenity V1/V2, DDR 1st Mix to EXTREME**
 - **DDR HOTTEST PARTY TIMELESS**
 - **Media / sing-along** (9 tracks)
