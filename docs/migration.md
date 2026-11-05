@@ -22,10 +22,9 @@ the cutover step.
 | `.allen` Caddy routes | `~/home-network/Caddyfile` | `caddy/Caddyfile` | No |
 | Poker game | `~/workspace/poker-game` | unchanged path (own repo) | No |
 | Hypometer | `~/leafs-hypometer` | unchanged path | Certs |
-| DDR HomeServer + media | `~/home-ddr` | `services/ddr/` | Media |
+| DDR HomeServer + media | `~/mac-studio-ai-homeserver/services/ddr/` | same repo | Media |
 | Gmail daemon | `~/gmail-events` | unchanged path | **Yes** (OAuth) |
 | Ollama + Qwen 27B | `~/mac-studio-ai-homeserver` | same repo | No |
-| Watchlist poller | this repo | same repo | No |
 
 **FACT (verified on the old Mac):** services currently bound: portal `UDP :53`,
 `TCP :8443`; Caddy `:80/:443`; poker `:8080`; Ollama `127.0.0.1:11434`.

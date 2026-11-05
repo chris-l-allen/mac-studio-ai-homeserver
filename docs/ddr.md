@@ -29,8 +29,9 @@ cd ~/mac-studio-ai-homeserver/services/ddr
 HOMEDDR_HOST=0.0.0.0 ./scripts/serve.sh  # expose on the LAN
 ```
 
-Published at **https://ddr.allen** via Caddy. Packs and media are copied from the
-old `~/home-ddr/songpacks` and `~/home-ddr/media` during migration.
+Published at **https://ddr.allen** via Caddy. Sourced content lives in
+`services/ddr/songpacks/` and `services/ddr/media/` (gitignored); the migration
+tarball carries both onto Rocinante. See `services/ddr/SOURCES.md`.
 
 ## DDR engine
 

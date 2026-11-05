@@ -28,7 +28,7 @@ HOST = os.environ.get("HOMEDDR_HOST", "127.0.0.1")
 PORT = int(os.environ.get("HOMEDDR_PORT", "8787"))
 
 SECTIONS = (
-    ("songs", "Song packs", "StepMania / OutFox packs (.sm, .ssc)"),
+    ("songpacks", "Song packs", "StepMania / OutFox packs (.sm, .ssc)"),
     ("media", "Media", "Karaoke backing tracks and audio"),
 )
 
