@@ -30,3 +30,10 @@ songpacks/Club Fantastic Season 2/   (16 songs)
 
 Sources: Freesound (CC0/CC BY) and Wikimedia Commons (CC BY), via Openverse.
 Per-file URLs are in `media/SOURCES.json`.
+
+## Playable library (curated 2026-11-05)
+
+The game now shows only **`songpacks/Kids 50/`** — 50 classic-DDR tracks at ≤135
+BPM, kid-appropriate. The full Club Fantastic, Serenity, and DDR sets are parked in
+`songpacks-archive/` (gitignored) and can be restored any time. Purchased tracks
+(Danny Go etc.) get their own pack alongside `Kids 50`.

@@ -21,6 +21,7 @@ services/network/data/
 # DDR content (large binaries; keep the directories)
 services/ddr/songpacks/*
 !services/ddr/songpacks/.gitkeep
+services/ddr/songpacks-archive/
 services/ddr/media/*
 !services/ddr/media/.gitkeep
 
