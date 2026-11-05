@@ -12,3 +12,4 @@ title: Documentation — Rocinante
 - [DDR](ddr.html) — the folded-in HomeDDR stack
 - [DDR setup](ddr-setup.html) — OutFox, pads, charts
 - [DDR HomeServer](ddr-homeserver.html) — serving the library
+- [Pre-implementation notes](archive/README-pre-implementation.html) — the deliberation, kept for the record

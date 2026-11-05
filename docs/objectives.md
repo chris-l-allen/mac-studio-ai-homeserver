@@ -6,7 +6,7 @@ title: Objectives — Rocinante
 # Objectives — Rocinante
 
 **Server name:** **Rocinante** (macOS Computer Name / LocalHostName `Rocinante`; optional LAN alias `rocinante.allen`).
-**Status:** drafting — owner is augmenting. This file is the source of truth for scope.
+**Status:** agreed 2026-11-05 — implementation underway. This file is the source of truth for scope.
 
 ---
 
