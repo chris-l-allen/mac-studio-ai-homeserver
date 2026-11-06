@@ -31,7 +31,7 @@ def main() -> None:
         if not audio:
             continue
         tracks.append({
-            "title": title_of(songdir),
+            "title": songdir.name,
             "pack": songdir.parent.name,
             "file": str(audio.relative_to(ROOT)),
         })
