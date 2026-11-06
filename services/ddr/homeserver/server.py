@@ -32,6 +32,14 @@ SECTIONS = (
     ("media", "Media", "Karaoke backing tracks and audio"),
 )
 
+# Audio types the stdlib table misses (notably .opus from OutFox Serenity)
+SimpleHTTPRequestHandler.extensions_map.update({
+    ".mp3": "audio/mpeg",
+    ".ogg": "audio/ogg",
+    ".opus": "audio/ogg",
+    ".wav": "audio/wav",
+})
+
 
 def list_files(folder: Path) -> list[str]:
     if not folder.is_dir():
