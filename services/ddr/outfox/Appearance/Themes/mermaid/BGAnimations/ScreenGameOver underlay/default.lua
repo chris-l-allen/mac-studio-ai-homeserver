@@ -1,8 +1,10 @@
 return Def.ActorFrame {
 	InitCommand = function(self) self:xy(SCREEN_CENTER_X, SCREEN_CENTER_Y) end,
 
-	Def.Quad {
-		InitCommand = function(self) self:zoomto(SCREEN_WIDTH, SCREEN_HEIGHT):diffuse(Color.Black) end,
+	-- pastel-pink nautical background
+	Def.Sprite {
+		Texture = "fail-bg.png";
+		InitCommand = function(self) self:center():zoomto(SCREEN_WIDTH, SCREEN_HEIGHT) end,
 	},
 
 	-- Hannah's "you failed" video (local-only file, not in git)
@@ -14,15 +16,12 @@ return Def.ActorFrame {
 		end,
 	},
 
-	Def.Quad {
-		InitCommand = function(self) self:zoomto(SCREEN_WIDTH, SCREEN_HEIGHT):diffuse(Color.Black):diffusealpha(0.20) end,
-	},
-
-	Def.BitmapText {
-		Font = "_Medium";
-		Text = "You failed - try again!";
+	-- nautical title
+	Def.Sprite {
+		Texture = "fail-title.png";
 		InitCommand = function(self)
-			self:y(-SCREEN_HEIGHT * 0.30):zoom(1.15):diffuse(Color.White):diffusealpha(0.95);
+			self:y(-SCREEN_HEIGHT * 0.31)
+			    :zoomto(SCREEN_WIDTH * 0.73, SCREEN_WIDTH * 0.73 * 480 / 1920);
 		end,
 	},
 }

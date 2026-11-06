@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fail screen preview</title>
+<style>
+  body{font:15px/1.5 -apple-system,system-ui,sans-serif;background:#140a1a;color:#eee;max-width:1000px;margin:2rem auto;padding:0 1rem}
+  h1{color:#ff8ad8}
+  #stage{position:relative;width:960px;max-width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;border:1px solid #3a2147;
+         background:url('Appearance/Themes/mermaid/Graphics/fail-bg.png') center/cover no-repeat}
+  video{position:absolute;top:0;left:50%;transform:translateX(-50%);height:100%}
+  .title{position:absolute;top:2%;left:50%;transform:translateX(-50%);width:73%}
+</style>
+</head>
+<body>
+  <h1>Fail screen preview</h1>
+  <div id="stage">
+    <video src="Appearance/Themes/mermaid/Graphics/fail.mp4" autoplay loop muted playsinline></video>
+    <img class="title" src="Appearance/Themes/mermaid/Graphics/fail-title.png" alt="You failed — try again!">
+  </div>
+  <p>In OutFox this plays (with audio) when the life bar empties.</p>
+</body>
+</html>
