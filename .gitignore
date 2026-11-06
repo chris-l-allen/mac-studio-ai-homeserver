@@ -23,6 +23,7 @@ services/ddr/songpacks/*
 !services/ddr/songpacks/.gitkeep
 services/ddr/songpacks-archive/
 services/ddr/player.html
+services/ddr/outfox/Appearance/Themes/mermaid/Graphics/Mermaid Loading.local.png
 services/ddr/media/*
 !services/ddr/media/.gitkeep
 
