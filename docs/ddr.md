@@ -36,6 +36,12 @@ tarball carries both onto Rocinante. See `services/ddr/SOURCES.md`.
 ## DDR engine
 
 Project OutFox runs on this same box (the owner wants the DDR station on the
-server). Install with `./scripts/install-outfox.sh`, then
-`./scripts/link-songpacks.sh` to link the shared library. The old repo's
-`HANDOFF.md` is the historical record for pad selection and the bridge plan.
+server). The **Mermaid** theme + palette-arrow noteskin live in
+`services/ddr/outfox/`; install them and link the song library with:
+
+```bash
+OUTFOX_ROOT=/Applications/OutFox ./scripts/migrate/outfox-setup.sh
+```
+
+The old repo's `HANDOFF.md` is the historical record for pad selection and the
+bridge plan.

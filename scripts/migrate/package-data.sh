@@ -22,7 +22,8 @@ EOF
 tar -czf "$OUT" -C "$OLD_HOME" \
   home-network/data \
   mac-studio-ai-homeserver/services/ddr/songpacks \
-  mac-studio-ai-homeserver/services/ddr/media \
+  "mac-studio-ai-homeserver/services/ddr/outfox/Appearance/Themes/mermaid/Graphics/Mermaid Loading.local.png" \
+  mac-studio-ai-homeserver/services/ddr/outfox/Appearance/Themes/mermaid/Graphics/fail.mp4 \
   gmail-events/credentials.json \
   gmail-events/token.json \
   gmail-events/.env \

@@ -77,8 +77,8 @@ Notes:
    mkdir -p services/network services/ddr
    tar -xzf ~/Desktop/homelab-migration-*.tar.gz -C "$HOME"
    rsync -a ~/home-network/data/ services/network/data/
-   # the tarball also restores services/ddr/{songpacks,media} into the repo,
-   # overwriting the empty dirs a fresh clone creates
+   # the tarball also restores services/ddr/songpacks and the local-only OutFox
+   # assets (photo loading screen, fail video) into the repo
    # gmail-events and leafs-hypometer stay at ~/gmail-events and ~/leafs-hypometer
    ```
 
@@ -145,6 +145,28 @@ This loads:
 > DNS on `:53` needs permission to bind a privileged port. If the portal log says
 > it fell back to `5353`, run the portal as a LaunchDaemon or with the same
 > privilege the old Mac uses.
+
+---
+
+## 4b. OutFox + Mermaid theme
+
+1. Install OutFox on Rocinante — copy the `OutFox` folder from the DMG to
+   `/Applications/OutFox` (it contains `OutFox.app`, `Appearance/`, `Songs/`).
+2. From the repo:
+
+   ```bash
+   OUTFOX_ROOT=/Applications/OutFox ./scripts/migrate/outfox-setup.sh
+   ```
+
+   It copies the Mermaid theme + noteskin, swaps in the local photo loading
+   screen (`Mermaid Loading.local.png`), installs `fail.mp4`, and symlinks the
+   song packs into OutFox's `Songs/`.
+3. Launch OutFox → **Options → Theme → Mermaid**, **Noteskin → Mermaid**.
+4. Test: play a song; fail it (drain the life bar) to see the video + nautical
+   title; check the loading screen.
+
+The theme and noteskin are in git; `Mermaid Loading.local.png` and `fail.mp4` are
+local-only and come from the migration tarball.
 
 ---
 
