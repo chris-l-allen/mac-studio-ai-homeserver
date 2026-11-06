@@ -52,7 +52,7 @@ def main() -> None:
     pw, ph = 706, 962
     px, py = 1120, 58
 
-    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1920" viewBox="0 0 1920 1920">
 <defs>
   <linearGradient id="ov" x1="0" y1="0" x2="1" y2="1">
     <stop offset="0" stop-color="#4a0f42" stop-opacity="0.75"/>
@@ -71,6 +71,8 @@ def main() -> None:
   </filter>
 </defs>
 
+<rect x="0" y="0" width="1920" height="1920" fill="#140b18"/>
+<g transform="translate(0,420)">
 <image x="0" y="0" width="1920" height="1080" href="{b64(bg, 'image/jpeg')}" preserveAspectRatio="xMidYMid slice"/>
 <rect x="0" y="0" width="1920" height="1080" fill="url(#ov)"/>
 
@@ -106,6 +108,7 @@ def main() -> None:
 <!-- waves -->
 <path d="M0 940 C 320 880 520 1010 860 960 C 1200 910 1500 1020 1920 950 L1920 1080 L0 1080 Z" fill="url(#wave)"/>
 <path d="M0 1000 C 360 960 640 1040 980 1000 C 1320 960 1600 1040 1920 1000 L1920 1080 L0 1080 Z" fill="#6ee7ff" opacity="0.10"/>
+</g>
 </svg>'''
 
     src = TMP / "loading.svg"
