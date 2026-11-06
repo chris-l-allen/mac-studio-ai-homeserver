@@ -12,7 +12,7 @@ AUDIO = {".mp3", ".ogg", ".opus", ".wav"}
 
 
 def title_of(songdir: pathlib.Path) -> str:
-    for chart in list(songdir.glob("*.ssc")) + list(songdir.glob("*.sm")):
+    for chart in list(songdir.glob("*.ssc")) + list(songdir.glob("*.sm")) + list(songdir.glob("*.dwi")):
         try:
             m = re.search(r"#TITLE:([^;]*)", chart.read_text(errors="ignore"))
             if m:
