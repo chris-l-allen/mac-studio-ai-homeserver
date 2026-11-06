@@ -20,6 +20,7 @@ from __future__ import annotations
 import html
 import json
 import os
+import re
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -91,6 +92,47 @@ def render_landing() -> str:
 """
 
 
+AUDIO_EXT = {".ogg", ".mp3", ".opus", ".wav"}
+
+
+def scan_tracks() -> list[dict]:
+    """Live scan of songpacks so the player reflects new songs immediately."""
+    tracks = []
+    for song in sorted((ROOT / "songpacks").glob("*/*")):
+        if not song.is_dir():
+            continue
+        audio = next((f for f in sorted(song.iterdir())
+                      if f.is_file() and f.suffix.lower() in AUDIO_EXT), None)
+        if not audio:
+            continue
+        tracks.append({
+            "title": song.name,
+            "pack": song.parent.name,
+            "file": str(audio.relative_to(ROOT)),
+        })
+    return tracks
+
+
+class RangeFile:
+    """Wrapper that limits a file read to a byte range."""
+
+    def __init__(self, f, length: int):
+        self.f = f
+        self.remaining = length
+
+    def read(self, n: int = -1) -> bytes:
+        if self.remaining <= 0:
+            return b""
+        if n is None or n < 0 or n > self.remaining:
+            n = self.remaining
+        data = self.f.read(n)
+        self.remaining -= len(data)
+        return data
+
+    def close(self) -> None:
+        self.f.close()
+
+
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(ROOT), **kwargs)
@@ -100,8 +142,60 @@ class Handler(SimpleHTTPRequestHandler):
             self._send_html(render_landing())
         elif self.path == "/health":
             self._send_json({"status": "ok", "root": str(ROOT)})
+        elif self.path.split("?", 1)[0] == "/api/tracks":
+            self._send_json(scan_tracks())
         else:
             super().do_GET()
+
+    def send_head(self):
+        """Serve files with HTTP Range support so audio/video can be seeked."""
+        path = self.translate_path(self.path)
+        if os.path.isdir(path):
+            return super().send_head()
+        ctype = self.guess_type(path)
+        try:
+            f = open(path, "rb")
+        except OSError:
+            self.send_error(404, "File not found")
+            return None
+        try:
+            fs = os.fstat(f.fileno())
+            size = fs.st_size
+            rng = self.headers.get("Range")
+            m = re.match(r"bytes=(\d*)-(\d*)$", rng.strip()) if rng else None
+            if m:
+                start_s, end_s = m.groups()
+                if start_s == "":
+                    length = int(end_s or 0)
+                    start, end = max(0, size - length), size - 1
+                else:
+                    start = int(start_s)
+                    end = int(end_s) if end_s else size - 1
+                end = min(end, size - 1)
+                if start > end or start >= size:
+                    self.send_error(416, "Requested Range Not Satisfiable")
+                    f.close()
+                    return None
+                length = end - start + 1
+                f.seek(start)
+                self.send_response(206)
+                self.send_header("Content-Type", ctype)
+                self.send_header("Content-Range", f"bytes {start}-{end}/{size}")
+                self.send_header("Content-Length", str(length))
+                self.send_header("Accept-Ranges", "bytes")
+                self.send_header("Last-Modified", self.date_time_string(fs.st_mtime))
+                self.end_headers()
+                return RangeFile(f, length)
+            self.send_response(200)
+            self.send_header("Content-Type", ctype)
+            self.send_header("Content-Length", str(size))
+            self.send_header("Accept-Ranges", "bytes")
+            self.send_header("Last-Modified", self.date_time_string(fs.st_mtime))
+            self.end_headers()
+            return f
+        except Exception:
+            f.close()
+            raise
 
     def _send_html(self, markup: str) -> None:
         payload = markup.encode("utf-8")
@@ -111,10 +205,11 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(payload)
 
-    def _send_json(self, data: dict) -> None:
+    def _send_json(self, data) -> None:
         payload = json.dumps(data).encode("utf-8")
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
+        self.send_header("Cache-Control", "no-store")
         self.send_header("Content-Length", str(len(payload)))
         self.end_headers()
         self.wfile.write(payload)

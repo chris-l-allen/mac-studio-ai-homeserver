@@ -1,112 +1,141 @@
 #!/usr/bin/env python3
-"""Build media/player.html: a browser player for every audio file in the
-song packs plus the media folder. Re-run after adding/removing packs."""
+"""Write player.html — a dynamic player that reads /api/tracks from the HomeServer.
+
+No song list is embedded: new/renamed songs appear on refresh (and every 30 s).
+"""
 from __future__ import annotations
 
-import json
 import pathlib
-import re
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-AUDIO = {".mp3", ".ogg", ".opus", ".wav"}
+OUT = ROOT / "player.html"
 
-
-def title_of(songdir: pathlib.Path) -> str:
-    for chart in list(songdir.glob("*.ssc")) + list(songdir.glob("*.sm")) + list(songdir.glob("*.dwi")):
-        try:
-            m = re.search(r"#TITLE:([^;]*)", chart.read_text(errors="ignore"))
-            if m:
-                return m.group(1).strip()
-        except OSError:
-            pass
-    return songdir.name
-
-
-def main() -> None:
-    tracks: list[dict[str, str]] = []
-    for songdir in sorted(ROOT.glob("songpacks/*/*")):
-        if not songdir.is_dir():
-            continue
-        audio = next((f for f in songdir.iterdir() if f.suffix.lower() in AUDIO), None)
-        if not audio:
-            continue
-        tracks.append({
-            "title": songdir.name,
-            "pack": songdir.parent.name,
-            "file": str(audio.relative_to(ROOT)),
-        })
-    # media/ was removed 2026-11-05; only step packs remain.
-
-    payload = json.dumps(tracks, ensure_ascii=False)
-    page = """<!doctype html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+PAGE = """<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>DDR library player</title>
 <style>
   body{font:15px/1.4 -apple-system,system-ui,sans-serif;max-width:860px;margin:2rem auto;padding:0 1rem}
   h1{margin:0 0 .4rem} #now{font-weight:600;margin:.6rem 0}
   audio{width:100%} .bar{display:flex;gap:.5rem;flex-wrap:wrap;margin:.6rem 0}
   input,select,button{font:inherit;padding:.35rem .5rem}
+  .seekrow{display:flex;align-items:center;gap:.6rem;margin:.35rem 0}
+  #seek{flex:1}
   .row{display:flex;justify-content:space-between;gap:1rem;padding:.25rem .3rem;cursor:pointer;border-bottom:1px solid #eee}
   .row:hover{background:#f6f6f6} .row.cur{background:#e8f0fe;font-weight:600}
   .pack{color:#888;font-size:.85em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:45%}
   #list{max-height:60vh;overflow:auto;border:1px solid #ddd;border-radius:6px;margin-top:.6rem}
+  #time{font-variant-numeric:tabular-nums;color:#555;min-width:8.5rem;text-align:right;font-size:.85em}
 </style></head><body>
 <h1>DDR library player</h1>
-<div id="now">—</div>
-<audio id="a" controls></audio>
+<div id="now">Loading library…</div>
+<audio id="a" controls preload="metadata"></audio>
+<div class="seekrow">
+  <input id="seek" type="range" min="0" max="1000" step="1" value="0">
+  <span id="time">0:00 / 0:00</span>
+</div>
 <div class="bar">
   <button onclick="prev()">⏮ Prev</button>
   <button onclick="next()">Next ⏭</button>
+  <button onclick="skip(-15)">−15s</button>
+  <button onclick="skip(15)">+15s</button>
+  <button id="refresh">Refresh</button>
   <input id="q" placeholder="Search title…" oninput="render()">
   <select id="pk" onchange="render()"><option value="">All packs</option></select>
 </div>
 <div id="list"></div>
 <script>
-const ALL = __PAYLOAD__;
-let i = 0;
-const a = document.getElementById('a'), now = document.getElementById('now');
-const packs = [...new Set(ALL.map(t => t.pack))].sort();
+const a = document.getElementById('a');
+const now = document.getElementById('now');
 const pk = document.getElementById('pk');
-packs.forEach(p => { const o = document.createElement('option'); o.value = o.textContent = p; pk.appendChild(o); });
+const seek = document.getElementById('seek');
+const timeEl = document.getElementById('time');
+let ALL = [], i = 0, scrubbing = false;
+
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
-function view() {
-  const q = document.getElementById('q').value.toLowerCase();
-  const pf = pk.value;
-  return ALL.map((t, idx) => ({t, idx})).filter(({t}) =>
-    (!pf || t.pack === pf) && (!q || t.title.toLowerCase().includes(q)));
+function fmt(t){ if(!isFinite(t)||t<0) return '0:00'; const m=Math.floor(t/60), s=Math.floor(t%60); return m+':'+String(s).padStart(2,'0'); }
+
+async function fetchTracks(){
+  const r = await fetch('/api/tracks', {cache:'no-store'});
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  return await r.json();
 }
-function render() {
-  const list = document.getElementById('list'); list.innerHTML = '';
-  view().forEach(({t, idx}) => {
-    const d = document.createElement('div');
-    d.className = 'row' + (idx === i ? ' cur' : '');
-    d.dataset.i = idx;
-    d.innerHTML = '<span>' + (idx + 1) + '. ' + esc(t.title) + '</span><span class="pack">' + esc(t.pack) + '</span>';
-    d.onclick = () => load(idx);
+function rebuildPacks(){
+  const keep = pk.value;
+  pk.innerHTML = '<option value="">All packs</option>';
+  for(const p of [...new Set(ALL.map(t=>t.pack))].sort()){
+    const o=document.createElement('option'); o.value=o.textContent=p; pk.appendChild(o);
+  }
+  if([...pk.options].some(o=>o.value===keep)) pk.value=keep;
+}
+function view(){
+  const q=document.getElementById('q').value.toLowerCase(), pf=pk.value;
+  return ALL.map((t,idx)=>({t,idx})).filter(({t})=>
+    (!pf || t.pack===pf) && (!q || t.title.toLowerCase().includes(q)));
+}
+function render(){
+  const list=document.getElementById('list'); list.innerHTML='';
+  for(const {t,idx} of view()){
+    const d=document.createElement('div');
+    d.className='row'+(idx===i?' cur':'');
+    d.dataset.i=idx;
+    d.innerHTML='<span>'+esc(t.title)+'</span><span class="pack">'+esc(t.pack)+'</span>';
+    d.onclick=()=>load(idx);
     list.appendChild(d);
-  });
+  }
 }
-function mark() {
-  document.querySelectorAll('.row').forEach(el => el.classList.toggle('cur', +el.dataset.i === i));
-}
-function load(n, autoplay = true) {
-  i = (n + ALL.length) % ALL.length;
-  const t = ALL[i];
-  a.src = '/' + t.file.split('/').map(encodeURIComponent).join('/');
-  now.textContent = (i + 1) + '/' + ALL.length + ' — ' + t.title + '  [' + t.pack + ']';
-  if (autoplay) { const p = a.play(); if (p && p.catch) p.catch(() => {}); }
+function mark(){ document.querySelectorAll('.row').forEach(el=>el.classList.toggle('cur', +el.dataset.i===i)); }
+function load(n, autoplay=true){
+  if(!ALL.length) return;
+  i=(n+ALL.length)%ALL.length;
+  const t=ALL[i];
+  a.src='/'+t.file.split('/').map(encodeURIComponent).join('/');
+  now.textContent=(i+1)+'/'+ALL.length+' — '+t.title+'  ['+t.pack+']';
+  if(autoplay){ const p=a.play(); if(p&&p.catch) p.catch(()=>{}); }
   mark();
 }
-function next() { load(i + 1); }
-function prev() { load(i - 1); }
-a.onended = () => next();
-a.onerror = () => { now.textContent = 'Could not play this file — try another.'; };
-render();
-if (ALL.length) { load(0, false); now.textContent = 'Ready — click a track to play.'; }
+function next(){load(i+1)} function prev(){load(i-1)}
+function skip(s){ if(isFinite(a.duration)) a.currentTime=Math.max(0,Math.min(a.duration,a.currentTime+s)); }
+function seekTo(){ if(isFinite(a.duration)) a.currentTime=seek.value/1000*a.duration; }
+
+a.addEventListener('timeupdate', ()=>{
+  if(!scrubbing && isFinite(a.duration)) seek.value=Math.round(a.currentTime/a.duration*1000);
+  timeEl.textContent=fmt(a.currentTime)+' / '+fmt(a.duration);
+});
+a.addEventListener('loadedmetadata', ()=>{ timeEl.textContent=fmt(a.currentTime)+' / '+fmt(a.duration); });
+seek.addEventListener('pointerdown', ()=>scrubbing=true);
+seek.addEventListener('pointerup', ()=>{ scrubbing=false; seekTo(); });
+seek.addEventListener('input', ()=>{ if(scrubbing) seekTo(); });
+a.onended=()=>next();
+a.onerror=()=>{ now.textContent='Could not play this file — try another.'; };
+
+async function refresh(initial=false){
+  try{
+    const prevFile = ALL[i] ? ALL[i].file : null;
+    ALL = await fetchTracks();
+    rebuildPacks();
+    if(prevFile){
+      const idx = ALL.findIndex(t=>t.file===prevFile);
+      if(idx>=0) i=idx;
+    }
+    render();
+    if(initial){
+      if(ALL.length){ load(0,false); now.textContent='Ready — click a track to play.'; }
+      else now.textContent='No songs found.';
+    } else mark();
+  }catch(e){ now.textContent='Library error: '+e.message; }
+}
+document.getElementById('refresh').onclick=()=>refresh();
+refresh(true);
+setInterval(()=>refresh(), 30000);
 </script></body></html>"""
-    out = ROOT / "player.html"
-    out.write_text(page.replace("__PAYLOAD__", payload))
-    print(f"wrote {out} ({len(tracks)} tracks)")
+
+
+def main() -> None:
+    OUT.write_text(PAGE)
+    print(f"wrote {OUT} (dynamic: /api/tracks)")
 
 
 if __name__ == "__main__":
