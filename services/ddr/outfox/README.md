@@ -1,4 +1,4 @@
-# Mermaid theme + Anchor noteskin
+# Mermaid theme + palette arrows
 
 Custom OutFox skin for Rocinante. Based on OutFox's **Alpha V: Dance** theme and the
 **default** dance noteskin (OutFox: Apache-2.0; graphics CC BY-SA 4.0, Team Rizu).
@@ -10,12 +10,12 @@ Copy into OutFox's `Appearance/` folder:
 
 ```
 Appearance/Themes/mermaid
-Appearance/NoteSkins/dance/anchor
+Appearance/NoteSkins/dance/mermaid
 ```
 
 Then in OutFox:
 - **Options → Theme → Mermaid**
-- **Options → Noteskin → Anchor** (the theme also defaults to `anchor`)
+- **Options → Noteskin → Mermaid** (the theme also defaults to `mermaid`)
 
 Existing song backgrounds/banners/jackets are untouched.
 
@@ -24,30 +24,29 @@ Existing song backgrounds/banners/jackets are untouched.
 | Piece | Change |
 |---|---|
 | Player UI colours | pink + aqua (`Scripts/Main.lua`) |
-| Notes | **vintage-metal anchors**, 8 metal tints (gold, bronze, silver, copper, patina, rose, gunmetal, pearl) |
-| Receptor | metal ring with patina/teal glow |
-| Loading / init | mermaid background with Hannah's photos (`Graphics/Mermaid Loading.png`) |
+| Notes | **palette arrows**, 8 quantisation colours |
+| Receptor | pink/aqua ring |
+| Loading / init | mermaid background with Hannah's photos |
+| Fail screen | pastel-pink background, nautical *Pirata One* title, Hannah's video |
 | Song-reload screen | same mermaid background |
 
-The loading/init background is wired through
-`BGAnimations/ScreenInit background/mermaid.lua` and
-`BGAnimations/ScreenReloadSongs background/mermaid.lua`.
+## Art & credits
 
-## Art
-
-- **Anchors:** original SVG art (metal gradients, bevels, shadow)
+- **Anchors:** removed (superseded by palette arrows)
+- **Title font:** *Pirata One* — SIL Open Font License (`fonts/`)
 - **Medallion:** Rawpixel CC0 mermaid illustration (`art-candidates/rawpixel-207.jpg`)
 - **Framed portrait:** *The Little Mermaid* — Elena Ringo, **CC BY 4.0**
   <https://commons.wikimedia.org/wiki/File:The_Little_Mermaid_-_Painting_by_Elena_Ringo.jpg>
-- **Photos:** Hannah's 2026 photos are kept **local only** (not committed).
+- **Photos + video:** Hannah's 2026 media are kept **local only** (not committed)
 
 ## Rebuild the art
 
 ```bash
 cd services/ddr/outfox
-python3 build-anchor.py          # anchor noteskin
-python3 build-loading.py         # mermaid-only loading screen
+python3 build-noteskin.py        # palette arrows + receptor
+python3 build-failscreen.py      # fail background, title, trimmed video
 python3 build-loading-photos.py  # loading screen with Hannah's photos
+python3 build-loading.py         # mermaid-only loading screen
 ```
 
 Requires macOS `qlmanage`, `ffmpeg`, and `sips`.

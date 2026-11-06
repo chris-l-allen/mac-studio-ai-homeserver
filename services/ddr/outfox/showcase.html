@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mermaid theme showcase</title>
+<style>
+  body{font:15px/1.5 -apple-system,system-ui,sans-serif;background:#120818;color:#eee;max-width:1100px;margin:2rem auto;padding:0 1rem}
+  h1{color:#ff8ad8;margin:0 0 .2rem} .sub{color:#aaa;margin:0 0 1.4rem}
+  h2{color:#6ee7ff;font-size:.95rem;text-transform:uppercase;letter-spacing:.07em;margin:1.8rem 0 .5rem}
+  .stage{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid #3a2147;background:#000}
+  .stage img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .stage video{position:absolute;top:0;left:50%;transform:translateX(-50%);height:100%}
+  .stage img.title{position:absolute;top:2%;left:50%;transform:translateX(-50%);width:73%}
+  #play{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid #3a2147;
+        background:linear-gradient(180deg,#2a0f36 0%,#120818 60%,#0b2a33 100%)}
+  .lane{position:absolute;top:0;bottom:0;width:96px}
+  .rec{position:absolute;bottom:22px;left:0;width:96px;height:96px;
+       background:url('Appearance/NoteSkins/dance/mermaid/_receptor%20(doubleres).png') center/contain no-repeat}
+  .note{position:absolute;left:0;width:96px;height:96px;background-repeat:no-repeat;
+        background-image:url('Appearance/NoteSkins/dance/mermaid/_arrow%201x8%20(doubleres).png');background-size:100% 800%}
+  .judge{position:absolute;left:0;right:0;bottom:32%;text-align:center;font-weight:800;font-size:46px;
+         color:#ffd166;text-shadow:0 0 14px #ff3cd2}
+  .combo{position:absolute;left:0;right:0;bottom:46%;text-align:center;font-weight:700;font-size:22px;color:#6ee7ff}
+  .row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:flex-end}
+  .arrow{width:72px;height:72px;background-image:url('Appearance/NoteSkins/dance/mermaid/_arrow%201x8%20(doubleres).png');
+         background-size:100% 800%;background-repeat:no-repeat}
+  .arrow span{display:block;margin-top:76px;font-size:.7rem;color:#888;text-align:center}
+  .swatches{display:flex;gap:.5rem}
+  .sw{width:60px;height:60px;border-radius:9px}
+</style>
+</head>
+<body>
+  <h1>Mermaid theme</h1>
+  <p class="sub">Loading · fail screen · palette arrows · pastel UI</p>
+
+  <h2>Loading / init</h2>
+  <div class="stage">
+    <img class="bg" src="Appearance/Themes/mermaid/Graphics/Mermaid Loading.local.png"
+         onerror="this.src='Appearance/Themes/mermaid/Graphics/Mermaid Loading.png'" alt="loading">
+  </div>
+
+  <h2>Fail screen</h2>
+  <div class="stage">
+    <img class="bg" src="Appearance/Themes/mermaid/Graphics/fail-bg.png" alt="">
+    <video src="Appearance/Themes/mermaid/Graphics/fail.mp4" autoplay loop muted playsinline></video>
+    <img class="title" src="Appearance/Themes/mermaid/Graphics/fail-title.png" alt="You failed — try again!">
+  </div>
+
+  <h2>Palette arrows</h2>
+  <div class="row" id="arrows"></div>
+
+  <h2>Gameplay mock</h2>
+  <div id="play">
+    <div class="judge">PERFECT</div>
+    <div class="combo">12 combo</div>
+  </div>
+
+  <h2>Palette</h2>
+  <div class="swatches">
+    <div class="sw" style="background:#ff3cd2"></div>
+    <div class="sw" style="background:#ff8ad8"></div>
+    <div class="sw" style="background:#ffd6ec"></div>
+    <div class="sw" style="background:#6ee7ff"></div>
+    <div class="sw" style="background:#7c4dff"></div>
+    <div class="sw" style="background:#ffd166"></div>
+  </div>
+
+  <script>
+    // arrow palette row
+    const names = ['4th','8th','12th','16th','24th','48th','64th','192nd'];
+    const row = document.getElementById('arrows');
+    for (let i = 0; i < 8; i++) {
+      const d = document.createElement('div');
+      d.className = 'arrow';
+      d.style.backgroundPositionY = (i * 100 / 7) + '%';
+      const l = document.createElement('span'); l.textContent = names[i];
+      row.appendChild(d); row.appendChild(l);
+    }
+
+    // gameplay mock: 4 lanes centered
+    const play = document.getElementById('play');
+    const lanes = [270, 378, 486, 594];
+    lanes.forEach((x, li) => {
+      const lane = document.createElement('div');
+      lane.className = 'lane';
+      lane.style.left = x + 'px';
+      const rec = document.createElement('div'); rec.className = 'rec'; lane.appendChild(rec);
+      const ys = [40 + li * 20, 150 + li * 26, 255 + li * 14, 340 + li * 8];
+      ys.forEach((y, j) => {
+        const n = document.createElement('div');
+        n.className = 'note';
+        n.style.top = y + 'px';
+        n.style.backgroundPositionY = (((li + j * 2) % 8) * 100 / 7) + '%';
+        lane.appendChild(n);
+      });
+      play.appendChild(lane);
+    });
+  </script>
+</body>
+</html>
