@@ -59,6 +59,7 @@ def main() -> None:
 
     # 3) nautical title
     title = '''<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1920">
+<rect width="1920" height="1920" fill="#ff00ff"/>
 <g font-family="Pirata One" text-anchor="middle">
 <text x="960" y="946" font-size="210" fill="#7a2e4a" opacity="0.35">You failed</text>
 <text x="960" y="940" font-size="210" fill="#fff6e0" stroke="#2a1a08" stroke-width="5" paint-order="stroke">You failed</text>
@@ -66,8 +67,15 @@ def main() -> None:
 <text x="960" y="1080" font-size="120" fill="#ffd166" stroke="#2a1a08" stroke-width="4" paint-order="stroke">try again!</text>
 </g></svg>'''
     t = render(title, "title")
-    subprocess.run(["sips", "-c", "480", "1920", str(t), "--out", str(GFX / "fail-title.png")],
+    cropped = TMP / "title-crop.png"
+    subprocess.run(["sips", "-c", "480", "1920", str(t), "--out", str(cropped)],
                    check=True, stdout=subprocess.DEVNULL)
+    # key out the magenta matte so only the text remains
+    subprocess.run([
+        "ffmpeg", "-v", "error", "-y", "-i", str(cropped),
+        "-vf", "format=rgba,colorkey=0xff00ff:0.30:0.08",
+        "-frames:v", "1", str(GFX / "fail-title.png"),
+    ], check=True)
 
     print("wrote", GFX / "fail.mp4", GFX / "fail-bg.png", GFX / "fail-title.png")
 
