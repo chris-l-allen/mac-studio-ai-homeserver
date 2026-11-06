@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mermaid theme preview</title>
+<style>
+  body{font:15px/1.5 -apple-system,system-ui,sans-serif;max-width:960px;margin:2rem auto;padding:0 1rem;background:#120818;color:#eee}
+  h1{margin:0 0 .2rem;color:#ff8ad8}
+  h2{margin:1.6rem 0 .4rem;color:#6ee7ff;font-size:1rem;text-transform:uppercase;letter-spacing:.06em}
+  img{max-width:100%;border-radius:10px;display:block}
+  .sub{color:#aaa;margin:0 0 1rem}
+  .row{display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-start}
+  .card{background:#1d0f26;border:1px solid #3a2147;border-radius:10px;padding:.75rem}
+  .swatches{display:flex;gap:.5rem}
+  .sw{width:64px;height:64px;border-radius:8px}
+  /* mock playfield */
+  #play{position:relative;height:460px;border-radius:12px;overflow:hidden;
+        background:linear-gradient(180deg,#2a0f36 0%,#120818 60%,#0b2a33 100%);
+        border:1px solid #3a2147}
+  .lane{position:absolute;top:0;bottom:0;width:96px}
+  .lane .rec{position:absolute;bottom:18px;left:0;width:96px;height:96px;
+       background:url('Appearance/NoteSkins/dance/anchor/_receptor%20(doubleres).png') center/contain no-repeat}
+  .lane .note{position:absolute;left:0;width:96px;height:96px;
+       background-image:url('Appearance/NoteSkins/dance/anchor/_arrow%201x8%20(doubleres).png');
+       background-size:100% 800%;background-repeat:no-repeat}
+  .tag{position:absolute;bottom:-1.5rem;width:96px;text-align:center;color:#888;font-size:.75rem}
+</style>
+</head>
+<body>
+  <h1>Mermaid theme</h1>
+  <p class="sub">Pink/aqua UI · anchor notes · mermaid loading screen</p>
+
+  <h2>Loading / init screen</h2>
+  <img src="Appearance/Themes/mermaid/Graphics/Mermaid%20Loading.png" alt="Mermaid loading screen">
+
+  <h2>Anchor notes (8 quantization colors)</h2>
+  <div class="row">
+    <div class="card" style="width:128px"><img src="Appearance/NoteSkins/dance/anchor/_arrow%201x8%20(doubleres).png" alt="anchor sheet"></div>
+    <div class="card"><img src="Appearance/NoteSkins/dance/anchor/_receptor%20(doubleres).png" alt="anchor receptor" style="width:128px"><p class="sub" style="margin:.4rem 0 0">Receptor</p></div>
+  </div>
+
+  <h2>Mock playfield</h2>
+  <div id="play"></div>
+  <script>
+    const play = document.getElementById('play');
+    const frames = [0,1,2,3,4,5,6,7];
+    const lanes = [0,1,2,3];
+    const left = [120, 300, 480, 660];
+    lanes.forEach((l, i) => {
+      const lane = document.createElement('div');
+      lane.className = 'lane';
+      lane.style.left = left[i] + 'px';
+      const rec = document.createElement('div'); rec.className='rec'; lane.appendChild(rec);
+      // scatter a few anchors per lane
+      const spots = [40 + i*18, 150 + i*30, 270 + i*12];
+      spots.forEach((y, j) => {
+        const n = document.createElement('div'); n.className='note';
+        n.style.top = y + 'px';
+        n.style.backgroundPositionY = ((frames[(i+j)%8]) * 100/7) + '%';
+        lane.appendChild(n);
+      });
+      const tag = document.createElement('div'); tag.className='tag'; tag.textContent='L D U R'[i]; tag.style.left=left[i]+'px'; play.appendChild(tag);
+      play.appendChild(lane);
+    });
+  </script>
+
+  <h2>Palette</h2>
+  <div class="swatches">
+    <div class="sw" style="background:#ff3cd2"></div>
+    <div class="sw" style="background:#ff8ad8"></div>
+    <div class="sw" style="background:#6ee7ff"></div>
+    <div class="sw" style="background:#7c4dff"></div>
+    <div class="sw" style="background:#ffd166"></div>
+  </div>
+</body>
+</html>

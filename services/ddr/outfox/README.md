@@ -34,13 +34,23 @@ The loading/init background is wired through
 `BGAnimations/ScreenInit background/mermaid.lua` and
 `BGAnimations/ScreenReloadSongs background/mermaid.lua`.
 
+## Art
+
+- **Medallion:** Rawpixel CC0 mermaid illustration (`art-candidates/rawpixel-207.jpg`)
+- **Framed portrait:** *The Little Mermaid* — Elena Ringo, **CC BY 4.0**
+  <https://commons.wikimedia.org/wiki/File:The_Little_Mermaid_-_Painting_by_Elena_Ringo.jpg>
+
+The portrait is used twice: as the blurred full-screen backdrop and as the framed
+image on the right. The medallion sits on the left.
+
 ## Rebuild the art
 
 ```bash
 cd services/ddr/outfox
-python3 build-mermaid.py
+python3 build-mermaid.py    # anchors, receptor, colours
+python3 build-loading.py    # loading screen from art-candidates/
 ```
 
 Requires macOS `qlmanage`, `ffmpeg` (vstack), and `sips`. Photos/mermaid art can be
-dropped in later; replace `Graphics/Mermaid Loading.png` or point the BGAnimations
-at new images.
+dropped in later; replace the art in `art-candidates/` or point the BGAnimations at
+new images.

@@ -91,11 +91,7 @@ def main() -> None:
 
     render(receptor_svg(), SKIN / "_receptor (doubleres).png", 128)
 
-    # loading/init background: render square, then centre-crop to 16:9
-    big = render(loading_svg(), TMP / "loading.png", 1920)
-    subprocess.run(["sips", "-c", "1080", "1920", str(big),
-                    "--out", str(THEME / "Graphics/Mermaid Loading.png")],
-                   check=True, stdout=subprocess.DEVNULL)
+    # the loading screen is built by build-loading.py from the sourced art
 
     # BGAnimations for init + song reload
     bg = '''local t = Def.ActorFrame {};
