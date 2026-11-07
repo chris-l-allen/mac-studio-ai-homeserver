@@ -3,7 +3,7 @@
 > Read this file first in any new session. It is the single source of truth for
 > project state, decisions, and the next actions. Keep it current as work lands.
 
-**Updated:** 2026-11-05
+**Updated:** 2026-11-07
 **Owner:** callen
 **Repo:** `/Users/callen/home-ddr` (local git; remote optional)
 
@@ -251,6 +251,9 @@ approval; nothing has been ordered.
 - `docs/homeserver.md` — server usage + LAN security notes.
 - `docs/index.md` + `docs/_config.yml` — GitHub Pages landing page and config.
 - `homeserver/server.py` — the server.
+- `PROMO-IMAGES-KPDH-2026-11-07.md` — K-Pop Demon Hunters promo image
+  replacement manifest (track → image mapping, sources, edits).
+- `SOURCES.md` / `CURATION.md` — music library manifest / curation record.
 - `scripts/*` — install/serve/link helpers.
 - `launchd/com.local.homeddr.plist` — persistence.
 
@@ -317,3 +320,11 @@ system software or buying anything. Keep HANDOFF.md updated as you go.
   arrives. Updated decisions, actions, budgets, docs, and resume prompt.
 - **2026-11-05** — The $929 refurb mini sold out. Re-checked stock: **16/512 at
   $1,189** now recommended, **16/256 at $1,059** budget alternative; totals updated.
+- **2026-11-07** — Replaced K-Pop Demon Hunters promo art: all 8 tracks now have
+  per-track 1024×400 banners, 1920×1080 backgrounds, 612×400 CD-title cards, and
+  raw single-cover jackets (built from official Wikipedia/Apple Music artwork via
+  Pillow). 15 chart files (`#BANNER`/`#BACKGROUND`/`#JACKET`/`#CDTITLE`) and the
+  pack banner repointed. Manifest: `PROMO-IMAGES-KPDH-2026-11-07.md`. Old
+  `bg.png`/`cd.png`/`*-bn(2).png` kept for rollback. UNVERIFIED in a live OutFox
+  render. NOTE: done in the LOCAL checkout (what running OutFox reads); the `.54`
+  (`ssh rosinate`) copy still has the old art — sync if that box matters.
