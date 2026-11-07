@@ -4,14 +4,25 @@ local function difficultyString()
 	return ToEnumShortString(steps:GetDifficulty())
 end
 
+local function difficultyLabel()
+	local steps = GAMESTATE:GetCurrentSteps(PLAYER_1)
+	if not steps then return "No chart" end
+	return "DIFFICULTY: " .. ToEnumShortString(steps:GetDifficulty())
+end
+
 return Def.ActorFrame{
+	Def.Quad{
+		InitCommand=function(self)
+			self:xy(SCREEN_CENTER_X, SCREEN_TOP+34):zoomto(340,40):diffuse(color("#163742")):diffusealpha(0.85)
+		end;
+	};
 	Def.BitmapText{
 		Font="Common Normal";
 		InitCommand=function(self)
-			self:xy(SCREEN_CENTER_X, SCREEN_TOP+36):zoom(0.9):shadowlength(1):strokecolor(color("#163742"))
+			self:xy(SCREEN_CENTER_X, SCREEN_TOP+34):zoom(1.0):shadowlength(1):strokecolor(color("#163742"))
 		end;
-		OnCommand=function(self) self:settext(difficultyString()) end;
-		CurrentStepsChangedMessageCommand=function(self) self:settext(difficultyString()) end;
+		OnCommand=function(self) self:settext(difficultyLabel()) end;
+		CurrentStepsChangedMessageCommand=function(self) self:settext(difficultyLabel()) end;
 	},
 	Def.BitmapText{
 		Font="Common Normal";

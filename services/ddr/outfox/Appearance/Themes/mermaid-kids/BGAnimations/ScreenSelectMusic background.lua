@@ -9,8 +9,9 @@ local function applyKidsWheel()
 	local wheel = screen:GetMusicWheel()
 	if wheel then
 		wheel:ChangeSort("SortOrder_Preferred")
+		local rate = tonumber(THEME:GetMetric("KidsDDR", "MusicRate")) or 1.0
 		local opts = GAMESTATE:GetSongOptionsObject("ModsLevel_Preferred")
-		if opts then opts:MusicRate(0.9) end
+		if opts then opts:MusicRate(rate) end
 		local groups = {"Kids Easy", "Stepmania Pop Hits Collection"}
 		local pool = {}
 		for _, g in ipairs(groups) do
