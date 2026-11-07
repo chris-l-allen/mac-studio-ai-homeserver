@@ -53,6 +53,15 @@ TITLES = [
     "Let's Dance",
     "Bye Bye Bye",
     "Tetris",
+    # --- K-Pop (2026-11-07) ---
+    "Free",
+    "Golden",
+    "How It's Done",
+    "Soda Pop",
+    "Strategy",
+    "TAKEDOWN",
+    "What It Sounds Like",
+    "Your Idol",
 ]
 
 # Prefer the kid-facing packs if a title appears more than once.
@@ -62,6 +71,7 @@ PACK_PRIORITY = {
     "Hannah's Picks": 2,
     "Highflyer's Rhythmic Garbage": 3,
     "Torukine": 4,
+    "K-Pop Demon Hunters": 5,
 }
 
 CHART_SUFFIXES = {".sm", ".ssc"}
