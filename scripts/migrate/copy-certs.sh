@@ -9,7 +9,7 @@ REPO="$(cd "$(dirname "$0")/../.." && pwd)"
 NET="$REPO/services/network"
 CERTS="$NET/data/certs"
 TLS="$NET/data/tls"
-HOSTS=(poker.allen homenetwork.allen hypometer.allen ddr.allen llm.allen)
+HOSTS=(poker.allen homenetwork.allen hypometer.allen ddr.allen llm.allen hockey.allen)
 
 mkdir -p "$TLS"
 for h in "${HOSTS[@]}"; do

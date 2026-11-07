@@ -34,6 +34,7 @@ cp -R "$SRC/Appearance/NoteSkins/dance/mermaid" "$ROOT/Appearance/NoteSkins/danc
 # local-only photo loading screen (replaces the committed mermaid-only one)
 if [ -f "$GFX_SRC/Mermaid Loading.local.png" ]; then
   cp "$GFX_SRC/Mermaid Loading.local.png" "$ROOT/Appearance/Themes/mermaid/Graphics/Mermaid Loading.png"
+  rm -f "$ROOT/Appearance/Themes/mermaid/Graphics/Mermaid Loading.local.png"
   echo "installed photo loading screen"
 else
   echo "no local photo loading screen found; using mermaid-only version"

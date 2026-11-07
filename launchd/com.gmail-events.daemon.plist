@@ -20,7 +20,7 @@
 
     <key>ProgramArguments</key>
     <array>
-        <string>/usr/local/bin/node</string>
+        <string>/opt/homebrew/bin/node</string>
         <string>/Users/callen/gmail-events/index.js</string>
     </array>
 
@@ -36,7 +36,7 @@
         <key>OLLAMA_MODEL</key>
         <string>hf.co/unsloth/Qwen3.8-27B-GGUF:Q6_K</string>
         <key>PATH</key>
-        <string>/usr/local/bin:/usr/bin:/bin</string>
+        <string>/opt/homebrew/bin:/usr/bin:/bin</string>
     </dict>
 
     <key>RunAtLoad</key>

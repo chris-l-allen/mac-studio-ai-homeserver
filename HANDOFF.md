@@ -1,9 +1,9 @@
 # HANDOFF — Rocinante home server + DDR
 
-**Updated:** 2026-11-05
+**Updated:** 2026-11-06
 **Owner:** callen
 **Repo:** `~/mac-studio-ai-homeserver` (branch `main`)
-**Box:** **Rocinante** — new Apple Silicon Mac; arriving; SSH access pending.
+**Box:** **Rocinante** — Apple Silicon, macOS 27.0, **10.0.0.54** (`ssh callen@10.0.0.54`).
 
 > Read this first in a new session. Deeper docs: `docs/objectives.md`,
 > `docs/migration.md`, `docs/network.md`, `docs/inference.md`, `docs/ddr.md`.
@@ -22,17 +22,38 @@ The current Mac becomes a client. Nothing is public; `.allen` is LAN-only.
 
 ---
 
-## Where we are (2026-11-05)
+## Where we are (2026-11-06)
 
-- Hardware bought; arrival/SSH pending.
-- **Deployment bundle complete:** `~/Desktop/Rocinante-Deploy/`.
-- **DDR library:** 80 songs (Disney Channel 6, Disney Grooves 21, Pop Hits 53),
-  renamed to **`Artist - Title`**.
-- **OutFox:** Mermaid theme, palette-arrow noteskin, photo loading screen, pastel
-  fail screen with video.
-- **Web player:** dynamic `/player.html` + `/api/tracks`, with HTTP Range seeking.
-- **New skill:** `ddr-song-ingest` (global + repo mirror).
-- The old Mac is still running all 7 home services (no downtime).
+**Deployed and verified.** The old Mac still runs the 7 services at `10.0.0.11`
+for rollback.
+
+- **Box:** Apple Silicon, macOS 27.0 (26A425), 36 GB RAM, 386 GB free; hostname
+  `Christophers-Mac-Studio.local`; **10.0.0.54** pinned on Wi-Fi (static).
+- **IP caveat:** built-in Ethernet (`en0`, MAC `bc:89:c1:dd:03:86`) had no link, so
+  Wi-Fi (`en1`) was pinned to the reserved `10.0.0.54`. If Ethernet is connected
+  later, clear the static Wi-Fi address first to avoid a duplicate.
+- **Services:** all 7 run as **boot-time LaunchDaemons** (`install-services.sh`);
+  Caddy as root, the rest as `callen`. Verified after a cold reboot with **no user
+  logged in**: SSH back in ~24 s, all services + model up.
+- **Unattended boot:** FileVault **disabled** (required for unattended boot; the
+  disk is no longer encrypted at rest), `pmset autorestart 1`, `sleep 0`.
+- **Inference:** Qwen 27B Q6_K created locally (21 GB) after `ollama pull` failed
+  with `Error: file does not exist`; `ollama list` shows
+  `hf.co/unsloth/Qwen3.8-27B-GGUF:Q6_K`; `/v1/models` works.
+- **Gmail:** classifier uses the local 27B. Fix: `/no_think` + `max_tokens: 1200`
+  in `~/gmail-events/classifier.js`, and `OLLAMA_MODEL` in `~/gmail-events/.env`.
+- **Certs:** re-issued with `IP:10.0.0.54` SAN; `copy-certs.sh` + Caddy reload.
+- **DDR:** OutFox 0.5.0 installed at `/Applications/OutFox`; Mermaid theme/noteskin,
+  photo loading screen, fail video; 4 packs linked, including `Hannah's Picks` /
+  Dumb Ways to Die. `https://ddr.allen/` returns 200.
+- **DNS:** the Rogers gateway **cannot** advertise custom DHCP DNS (no LAN DNS
+  field; WAN DNS is ISP read-only). A split-DNS profile is served at
+  `http://10.0.0.54/dns-profile.mobileconfig`: only `*.allen` -> `10.0.0.54`, all
+  other DNS unchanged, so a Rocinante outage affects only `.allen`. macOS hosts
+  with a stale `/etc/resolver/allen` must update it — `set-dns.command` now writes
+  `10.0.0.54`.
+- **Hosts:** `homenetwork`, `poker`, `hypometer`, `hockey` (alias → `8899`), `ddr`,
+  and `llm` all resolve to `10.0.0.54`.
 
 ---
 
@@ -49,30 +70,40 @@ The current Mac becomes a client. Nothing is public; `.allen` is LAN-only.
 | `README.md` | morning runbook |
 | `SHA256SUMS.txt` | checksums |
 
-Verified: CA root key + Gmail token + songpacks + photo/video in the tarball; all
-migration scripts pass `bash -n`; plists pass `plutil`; Caddy validates; `ddr.allen`
-and `llm.allen` certs verify OK.
+Verified: all four SHA256 checksums OK on the destination.
 
 ---
 
-## Deploy sequence
+## Deploy sequence (as executed 2026-11-06)
 
-1. Copy the bundle to Rocinante; install Xcode CLT + Homebrew + `python3 node caddy ollama git`.
-2. Clone the repo; unpack the bundle (`README.md` in the bundle has exact commands).
-3. Install OutFox, then `OUTFOX_ROOT=/Applications/OutFox ./scripts/migrate/outfox-setup.sh`
-   (copies theme/noteskin, swaps in the photo loading screen, installs `fail.mp4`,
-   links song packs).
-4. `./scripts/pull-models.sh` (Qwen 3.8 27B Q6, ~22 GB).
-5. `./scripts/migrate/copy-certs.sh` (re-issue if the IP changed).
-6. Choose the IP: same-IP swap (`10.0.0.11`) or a new IP → update
-   `services/network/data/dns.json`, Caddy `LAN_IP`, poker `PUBLIC_URL`, router DNS.
-7. `./scripts/migrate/install-services.sh`.
-8. Gmail: re-auth (`bash ~/gmail-events/fix-auth.sh`) and run `node classify-test.js`.
-9. Verify all `.allen` hosts, Ollama, Gmail, DDR, OutFox; reboot test.
-10. Cutover; keep the old Mac for rollback.
-
-**Interactive:** Xcode/Homebrew (sudo/GUI), Google sign-in, selecting the theme in
-OutFox. Automatable via `scripts/migrate/deploy-remote.sh` once SSH is on.
+1. SSH to `callen@10.0.0.54` (key installed with `ssh-copy-id -f`; the private key
+   is `~/.ssh/id_rsa.tmp`).
+2. Copy the bundle (`rsync`), verify `SHA256SUMS.txt`.
+3. Fetch the repo with `curl` (git is a CLT stub until CLT is installed):
+   `https://codeload.github.com/chris-l-allen/mac-studio-ai-homeserver/tar.gz/refs/heads/main`.
+4. Unpack `homelab-apps.tar.gz` and `homelab-migration.tar.gz` into `$HOME`; poker
+   into `~/workspace`; `rsync ~/home-network/data/` into
+   `services/network/data/`.
+5. Install CLT from the downloaded `CLTools_Executables.pkg` (`sudo installer
+   -pkg ... -target /`); `softwareupdate` stalls on this box.
+6. Install Homebrew from the `main` tarball into `/opt/homebrew` (the `master`
+   tarball is retired); `brew install python node caddy ollama git ffmpeg`.
+7. OutFox: copy the DMG's `OutFox/` to `/Applications/OutFox`; run
+   `OUTFOX_ROOT=/Applications/OutFox ./scripts/migrate/outfox-setup.sh`; copy
+   `Hannah's Picks` over and link it.
+8. IP: set `10.0.0.54` in `dns.json`, `reservations.json`, Caddy `LAN_IP`, poker
+   `PUBLIC_URL`; fix plists to `/opt/homebrew`; add `/opt/homebrew/bin/openssl` to
+   the portal candidates.
+9. `copy-certs.sh`; re-issue certs with `sans:["10.0.0.54"]` via the portal API.
+10. `sudo ./scripts/migrate/install-services.sh` (LaunchDaemons, boot-time).
+11. Model: `ollama pull` downloads the blobs but fails to write the manifest; create
+    the model with `ollama create hf.co/unsloth/Qwen3.8-27B-GGUF:Q6_K` from the
+    cached blob.
+12. Gmail: `OLLAMA_MODEL` in `.env`; `/no_think` + `max_tokens: 1200` in
+    `classifier.js`; run `node classify-test.js`.
+13. `fdesetup disable` (unattended boot), `pmset -a autorestart 1 sleep 0`.
+14. Reboot test with no user logged in; verify all services, `.allen` endpoints,
+    `/v1/models`.
 
 ---
 
@@ -92,23 +123,14 @@ OutFox. Automatable via `scripts/migrate/deploy-remote.sh` once SSH is on.
 
 ## Skill: `ddr-song-ingest`
 
-**Reload opencode to load it.** Canonical install:
-`~/.config/opencode/skills/ddr-song-ingest/`; repo mirror at `skills/ddr-song-ingest/`.
+Canonical install: `~/.config/opencode/skills/ddr-song-ingest/`; repo mirror at
+`skills/ddr-song-ingest/`. See `SKILL.md` for the purchase hand-off and ingest.
 
-It takes a purchased, DRM-free audio file and produces a ready OutFox folder:
-`audio.ogg` (native vorbis), `<Title>.ssc` (Beginner/Easy/Medium), `jacket.png`,
-`banner.png`, blurred `bg.png`. BPM/offset auto-detect with `--bpm`/`--offset`
-overrides and a BPM cache.
-
-```bash
-python3 ~/.config/opencode/skills/ddr-song-ingest/scripts/ingest_song.py \
-  --file ~/Music/track.m4a --title "Dumb Ways to Die" \
-  --artist "Tangerine Kitty" --pack "Hannah's Picks"
-```
-
-Tested on a library track: detector **89.29 BPM vs 90** (low-confidence flag),
-OGG output, art, 3 charts; dynamic player went **80 → 81 → 80**. `.m4p` (DRM) is
-rejected. Auto-charts are playable starting points; refine in OutFox's editor.
+- Purchase assist: `scripts/purchase_song.py` (iTunes Store search/open; the charge
+  is confirmed by the signed-in user).
+- Ingest: `scripts/ingest_song.py` (OGG, art, Beginner/Easy/Medium charts, BPM cache).
+- `Dumb Ways to Die` (Tangerine Kitty) was purchased and ingested on 2026-11-06;
+  SongBPM confirmed **128 BPM** (detector said 127.12 low-confidence).
 
 ---
 
@@ -116,6 +138,8 @@ rejected. Auto-charts are playable starting points; refine in OutFox's editor.
 
 - Hannah's photos/video are **local only** (gitignored; in the bundle).
 - The migration tarball is **unencrypted** — move directly, then shred.
+- **FileVault is OFF on Rocinante** (required for unattended boot). The disk is not
+  encrypted at rest; physical access = data access.
 - The old DeepSeek key was removed from the live plist and `.env`; rotate it if not
   already revoked.
 - The photo loading image was force-pushed out of the branch after a brief commit;
@@ -126,24 +150,34 @@ rejected. Auto-charts are playable starting points; refine in OutFox's editor.
 
 ## Open items / next actions
 
-1. Enable SSH; run the deploy (see above).
-2. Pull the 27B model; verify `/v1`.
-3. Re-auth Gmail; confirm local classification.
-4. Install OutFox theme/noteskin; test loading, fail video, and a song.
-5. Cutover IP/DNS; reboot test; keep rollback.
-6. Reload opencode and run `ddr-song-ingest` on a purchased track.
-7. Optional: tint long-note holds, add more songs, album art for purchased tracks.
+1. **Client DNS:** install `http://10.0.0.54/dns-profile.mobileconfig` on Apple
+   devices; on macOS also ensure `/etc/resolver/allen` is `10.0.0.54`
+   (`set-dns.command`). Other devices: DNS `10.0.0.54` primary, `10.0.0.1` fallback.
+2. **Cutover:** once every client uses the profile/command, the old Mac
+   (`10.0.0.11`) is unused; stop its 7 services and keep it for rollback.
+3. **Router:** the Rogers gateway cannot advertise custom DHCP DNS. Network-wide
+   automatic DNS needs a bridge-mode gateway + a router that supports custom DHCP
+   DNS (or a dedicated DHCP/DNS box).
+4. **OutFox:** launch on Rocinante (login required for the GUI), select Mermaid,
+   test a song + fail video. The app is not running headless.
+5. **DDR songs:** ingest more via the skill; `Dumb Ways to Die` is in
+   `Hannah's Picks`.
+6. Optional: tint long-note holds; add more packs.
 
 ---
 
 ## Facts / versions
 
+- Rocinante: Apple Silicon, macOS **27.0** (26A425), 36 GB RAM, LAN **10.0.0.54**
+  (Wi-Fi static), hostname `Christophers-Mac-Studio.local`.
 - Old Mac: Intel, macOS **26.5.2**, LAN **10.0.0.11**, hostname `callen-HGJJR31JW9`.
-- Python **3.14.6**; ffmpeg **9.0.1** (native `vorbis`, no `drawtext`).
-- OutFox **0.5.0 pre043** (DMG saved).
-- 7 home services live on the old Mac.
+- Homebrew `/opt/homebrew`; Python **3.15.2**; Node **26.13.0**; Caddy **2.11.9**;
+  Ollama **0.40.14**; ffmpeg **9.0.2**; OpenSSL **4.1.0**.
+- OutFox **0.5.0 pre043**; model `hf.co/unsloth/Qwen3.8-27B-GGUF:Q6_K` (21 GB).
 
 ## Resume prompt
 
-> Read `HANDOFF.md`. The box is Rocinante; SSH may be on. Continue with the deploy
-> sequence, then verify. The `ddr-song-ingest` skill is ready after an opencode reload.
+> Read `HANDOFF.md`. Rocinante is live at `10.0.0.54`; all 7 services are boot-time
+> LaunchDaemons and survive a cold reboot with no login. Remaining: client DNS via
+> the split-DNS profile, then cut over from the old Mac. The `ddr-song-ingest`
+> skill is installed.

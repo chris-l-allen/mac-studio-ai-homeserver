@@ -17,13 +17,33 @@ songpacks/<Pack>/<Artist> - <Title>/
   bg.png               # blurred/darkened gameplay background
 ```
 
-It does **not** download music. The user supplies a purchased, DRM-free file.
+It does **not** complete the charge itself. No store exposes a public
+"purchase this track" API, so buying is a hand-off: the helper finds the exact
+track, prints price and store URL, and opens the store page in Music. The
+signed-in user confirms the charge (password/Touch ID), which the platform does
+not allow scripts to do.
 
-## Purchase step (manual)
+## Purchase assistance
 
-- Buy the track in the **iTunes Store** (Music app) or another DRM-free store.
-- Apple Music subscription downloads are `.m4p` (DRM) — the script rejects them.
-- Save/purchase the file; embedded album art is used automatically.
+`scripts/purchase_song.py` searches the iTunes Store, ranks exact title/artist
+matches, and only lists tracks with a real store price (Apple Music streams have
+none). Then:
+
+```bash
+python3 ~/.config/opencode/skills/ddr-song-ingest/scripts/purchase_song.py \
+  --title "Dumb Ways to Die" --artist "Tangerine Kitty" \
+  --list                                   # see matches + prices
+  --open --wait 300 --ingest --pack "Hannah's Picks"   # open, wait, ingest
+```
+
+- `--open` opens the chosen track page in Music.
+- `--wait SECONDS` polls the media folder for the purchased download.
+- `--ingest` hands the found file to `ingest_song.py` automatically.
+- `--file PATH` skips purchase and ingests an existing file.
+- Already signed in? Check with `defaults read com.apple.iTunes | grep Store`.
+
+Apple Music subscription downloads are `.m4p` (DRM) — the scripts reject them.
+Buy the iTunes Store version (`.m4a`); embedded album art is used automatically.
 
 ## Command
 

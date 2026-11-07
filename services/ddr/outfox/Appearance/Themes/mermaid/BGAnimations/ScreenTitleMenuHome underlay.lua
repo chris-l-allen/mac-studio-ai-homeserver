@@ -55,6 +55,10 @@ local MascotEnabled = LoadModule("Config.Load.lua")("ShowMascotCharacter","Save/
 -- Here we will first display the logo and the mascot if required
 -- The mascot must be done before the main menu so that the buttons can overlap it
 local t = Def.ActorFrame{
+	Def.Sprite{
+		Texture=THEME:GetPathG("", "Mermaid Loading");
+		InitCommand=function(self) self:xy(SCREEN_CENTER_X, SCREEN_CENTER_Y):zoomto(SCREEN_WIDTH, SCREEN_HEIGHT) end;
+	},
     CoinModeChangedMessageCommand=function(self)
         SCREENMAN:SetNewScreen( Branch.TitleMenu() )
     end,

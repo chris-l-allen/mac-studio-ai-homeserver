@@ -175,4 +175,4 @@ if (not in4_3Area) and not (needsStats and validForStats) then
 	}
 end
 
-return LoadHUD
+return Def.ActorFrame{}

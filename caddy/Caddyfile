@@ -32,6 +32,16 @@ homenetwork.allen {
 		root * {$HOME}/mac-studio-ai-homeserver/services/network
 		file_server
 	}
+
+	handle /dns-profile.mobileconfig {
+
+		header Content-Type application/x-apple-aspen-config
+
+		root * {$HOME}/mac-studio-ai-homeserver/services/network
+
+		file_server
+
+	}
 	handle {
 		reverse_proxy https://127.0.0.1:8443 {
 			transport http {
@@ -46,6 +56,12 @@ hypometer.allen {
 	tls {$HOME}/mac-studio-ai-homeserver/services/network/data/tls/hypometer.allen.crt {$HOME}/mac-studio-ai-homeserver/services/network/data/tls/hypometer.allen.key
 	reverse_proxy 127.0.0.1:8899
 }
+
+hockey.allen {
+	tls {$HOME}/mac-studio-ai-homeserver/services/network/data/tls/hockey.allen.crt {$HOME}/mac-studio-ai-homeserver/services/network/data/tls/hockey.allen.key
+	reverse_proxy 127.0.0.1:8899
+}
+
 
 # DDR song/media library (plain HTTP :8787)
 ddr.allen {
@@ -69,6 +85,11 @@ llm.allen {
 # plain-HTTP listener on :8081.
 http://{$LAN_IP} {
 	handle /set-dns.command {
+		root * {$HOME}/mac-studio-ai-homeserver/services/network
+		file_server
+	}
+	handle /dns-profile.mobileconfig {
+		header Content-Type application/x-apple-aspen-config
 		root * {$HOME}/mac-studio-ai-homeserver/services/network
 		file_server
 	}

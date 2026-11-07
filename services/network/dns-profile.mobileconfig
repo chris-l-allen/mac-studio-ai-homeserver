@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>PayloadContent</key>
+  <array>
+    <dict>
+      <key>PayloadType</key><string>com.apple.dnsSettings.managed</string>
+      <key>PayloadIdentifier</key><string>allen.home.dns.managed</string>
+      <key>PayloadUUID</key><string>7A2D3B21-4C5E-4F6A-9B0C-1D2E3F4A5B6C</string>
+      <key>PayloadDisplayName</key><string>Home .allen DNS</string>
+      <key>PayloadVersion</key><integer>1</integer>
+      <key>DNSSettings</key>
+      <dict>
+        <key>DNSProtocol</key><string>Cleartext</string>
+        <key>ServerAddresses</key>
+        <array><string>10.0.0.54</string></array>
+        <key>SupplementalMatchDomains</key>
+        <array><string>allen</string></array>
+        <key>SupplementalMatchDomainsNoSearch</key><true/>
+      </dict>
+    </dict>
+  </array>
+  <key>PayloadDisplayName</key><string>Home .allen DNS</string>
+  <key>PayloadIdentifier</key><string>allen.home.profile</string>
+  <key>PayloadUUID</key><string>6F1C2A10-3B4D-4E5F-8A9B-0C1D2E3F4A5B</string>
+  <key>PayloadType</key><string>Configuration</string>
+  <key>PayloadVersion</key><integer>1</integer>
+  <key>PayloadOrganization</key><string>Home</string>
+  <key>PayloadDescription</key><string>Routes only *.allen queries to the home server at 10.0.0.54. All other DNS is unchanged, so internet access is unaffected if the server is offline.</string>
+</dict>
+</plist>

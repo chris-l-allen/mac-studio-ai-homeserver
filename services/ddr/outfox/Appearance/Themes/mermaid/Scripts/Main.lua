@@ -161,8 +161,16 @@ Branch.TitleMenu = function()
 	return "ScreenTitleMenuHome"
 end
 
+local function IsKidsTheme()
+	return string.find(THEME:GetCurrentThemeDirectory(), "mermaid%-kids") ~= nil
+end
+
+local function IsClassicTheme()
+	return string.find(THEME:GetCurrentThemeDirectory(), "mermaid%-classic") ~= nil
+end
+
 Branch.AfterInit = function()
-	return "KnownBugs"
+	return Branch.TitleMenu()
 	--[[
 	if GAMESTATE:GetCoinMode() == 'CoinMode_Home' then
 		return "ScreenLogoHome"
@@ -173,12 +181,15 @@ Branch.AfterInit = function()
 end
 
 Branch.AfterProfileLoad = function()
+	if IsKidsTheme() then return "ScreenSelectMusic" end
+	if IsClassicTheme() then return "ScreenSelectMusic" end
 	-- Go to the style selection screen unless they're using AutoSetStyle.
 	return "ScreenSelectPlayMode"
 	-- return "LuaSelectMusic"
 end
 
 Branch.AfterProfileSave = function()
+	if IsKidsTheme() or IsClassicTheme() then return "ScreenSelectMusic" end
 	if GAMESTATE:Env()["ForceEndSession"] then
 		return Branch.TitleMenu()
 	end
@@ -210,6 +221,7 @@ Branch.ReturnToMainMenu = function()
 end
 
 Branch.AfterSelectProfile = function()
+	if IsClassicTheme() then return "ScreenSelectMusic" end
 	if getenv("StartFitness") == true then
 		return "ScreenFitnessOptions"
 	end

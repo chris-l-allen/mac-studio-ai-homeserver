@@ -11,8 +11,6 @@ local t = Def.ActorFrame{
 	end
 
 }
-
-t[#t+1] = LoadActor( THEME:GetPathB("ScreenInit","overlay") )
 t[#t+1] = LoadActor(THEME:GetPathB("_Attract","PlayerButtons") )
 
 return t

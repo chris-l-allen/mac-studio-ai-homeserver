@@ -56,4 +56,6 @@ purchase (.m4a) ─► probe ─► audio.ogg ─► artwork ─► tempo/offset
 - swap the tempo detector for `aubio`/`librosa` when available
 - add a `--chartpack` to use curated charts
 - add album-art fetch from the store
+- purchase automation is a hand-off (search → open store page → user confirms);
+  no store offers a scriptable charge API
 - emit a course (`Songs`/`Courses`) entry for a “new songs” playlist

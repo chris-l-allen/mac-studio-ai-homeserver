@@ -14,7 +14,7 @@
 
     <key>ProgramArguments</key>
     <array>
-        <string>/usr/local/bin/node</string>
+        <string>/opt/homebrew/bin/node</string>
         <string>/Users/callen/workspace/poker-game/server.js</string>
     </array>
 
@@ -30,7 +30,7 @@
         <key>PORT</key>
         <string>8080</string>
         <key>PUBLIC_URL</key>
-        <string>http://10.0.0.11:8080</string>
+        <string>http://10.0.0.54:8080</string>
     </dict>
 
     <key>RunAtLoad</key>

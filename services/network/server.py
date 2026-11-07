@@ -65,6 +65,7 @@ DEFAULT_USERNAME = "callen"
 
 # Prefer a modern OpenSSL; fall back to the system LibreSSL.
 _OPENSSL_CANDIDATES = [
+    "/opt/homebrew/bin/openssl",  # brew OpenSSL 3.x (arm64)
     "/usr/local/bin/openssl",   # brew OpenSSL 3.x
     "/usr/bin/openssl",         # macOS LibreSSL
     "/opt/local/bin/openssl",   # MacPorts (old)

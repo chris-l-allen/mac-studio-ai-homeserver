@@ -19,7 +19,7 @@
 
     <key>ProgramArguments</key>
     <array>
-        <string>/usr/local/bin/python3</string>
+        <string>/opt/homebrew/bin/python3</string>
         <string>/Users/callen/mac-studio-ai-homeserver/services/network/server.py</string>
     </array>
 
