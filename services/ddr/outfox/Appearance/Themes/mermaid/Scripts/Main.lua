@@ -190,7 +190,7 @@ Branch.AfterGameplay = function()
 	if ps and song and ps:GetAliveSeconds() < (song:MusicLengthSeconds() - 1) then
 		return "ScreenGameOver"
 	end
-	return "ScreenEvaluationNormal"
+	return "ScreenTitleMenuHome"
 end
 
 Branch.AfterProfileLoad = function()
