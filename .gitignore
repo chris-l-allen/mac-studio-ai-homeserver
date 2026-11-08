@@ -34,3 +34,6 @@ __pycache__/
 # Editor / tooling
 .idea/
 .vscode/
+
+# DDR recovery backups (large binaries)
+services/ddr/archive/
