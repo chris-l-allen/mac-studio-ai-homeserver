@@ -53,16 +53,29 @@ class KeymapTests(unittest.TestCase):
             self.assertEqual(rc2, 0, out)
 
             _, entries, _ = fix_keymap.parse(p.read_text())
-            # P2 directions must all be present.
-            self.assertEqual(entries["2_Up"], "Key_w::::Key_KP 8")
-            self.assertEqual(entries["2_Down"], "Key_s::::Key_KP 2")
-            self.assertEqual(entries["2_Left"], "Key_a::::Key_KP 4")
-            self.assertEqual(entries["2_Right"], "Key_d::::Key_KP 6")
-            # P1 menu buttons must match the pad's arrows.
-            self.assertEqual(entries["1_MenuUp"], "Key_up")
-            self.assertEqual(entries["1_MenuDown"], "Key_down")
-            self.assertEqual(entries["1_MenuLeft"], "Key_left")
-            self.assertEqual(entries["1_MenuRight"], "Key_right")
+            # P1/P2 directions.
+            for a, k in (("1_Up", "Key_up"), ("1_Down", "Key_down"),
+                         ("1_Left", "Key_left"), ("1_Right", "Key_right"),
+                         ("2_Up", "Key_w"), ("2_Down", "Key_s"),
+                         ("2_Left", "Key_a"), ("2_Right", "Key_d")):
+                self.assertEqual(entries[a], k)
+            # Menu buttons must stay unbound so they cannot collide with the
+            # direction bindings (OutFox clears one side on exit).
+            for a in ("1_MenuUp", "1_MenuDown", "1_MenuLeft", "1_MenuRight",
+                      "2_MenuUp", "2_MenuDown", "2_MenuLeft", "2_MenuRight"):
+                self.assertEqual(entries[a], "")
+
+    def test_no_direction_menu_overlap(self):
+        issues = fix_keymap.problems(fix_keymap.CANONICAL)
+        self.assertFalse(
+            [x for x in issues if "both a direction and a menu" in x], issues
+        )
+
+    def test_overlap_is_rejected(self):
+        entries = dict(fix_keymap.CANONICAL)
+        entries["1_MenuUp"] = "Key_up"  # collides with 1_Up
+        issues = fix_keymap.problems(entries)
+        self.assertTrue(any("both a direction and a menu" in x for x in issues), issues)
 
     def test_forbidden_key_in_direction_fails(self):
         with tempfile.TemporaryDirectory() as d:

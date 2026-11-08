@@ -62,6 +62,17 @@ local t = Def.ActorFrame{
 t[#t+1] = optionButton("OnePlayer", "1 PLAYER", SCREEN_CENTER_X - 200)
 t[#t+1] = optionButton("TwoPlayers", "2 PLAYERS", SCREEN_CENTER_X + 200)
 
+-- The pad's arrows are gameplay directions (binding them to the menu too makes
+-- OutFox clear the direction on exit). So the chooser defaults to 1P; player 2
+-- joins with the SPACE key on the next screen.
+t[#t+1] = Def.BitmapText{
+	Font = "_Plex Bold Large",
+	Text = "Press START to play  •  Player 2: press SPACE on the song screen",
+	InitCommand = function(self)
+		self:xy(SCREEN_CENTER_X, SCREEN_BOTTOM - 44):zoom(0.42):shadowlength(1):strokecolor(color("#0E2830"))
+	end,
+}
+
 t[#t+1] = Def.ActorFrame{
 	OnCommand = function(self)
 		pcall(function() GAMESTATE:Reset() end)
@@ -71,16 +82,23 @@ t[#t+1] = Def.ActorFrame{
 		if top then
 			top:AddInputCallback(function(event)
 				if event.type ~= "InputEventType_FirstPress" then return false end
-				local b = event.GameButton
-				if b == "MenuLeft" or b == "Left" then
+				-- event.button is the gameplay button (direction); event.GameButton
+				-- is the menu button. The pad's arrows are bound to directions
+				-- only, so check both to keep 1P/2P selectable.
+				local b = event.button
+				local mb = event.GameButton
+				local function hit(name)
+					return b == name or mb == name or mb == "Menu" .. name
+				end
+				if hit("Left") then
 					selected = 1; refresh(self:GetParent()); return true
-				elseif b == "MenuRight" or b == "Right" then
+				elseif hit("Right") then
 					selected = 2; refresh(self:GetParent()); return true
-				elseif b == "MenuDown" or b == "Down" then
+				elseif hit("Down") then
 					selected = 1; refresh(self:GetParent()); return true
-				elseif b == "MenuUp" or b == "Up" then
+				elseif hit("Up") then
 					selected = 2; refresh(self:GetParent()); return true
-				elseif b == "Start" then
+				elseif hit("Start") then
 					confirm(); return true
 				end
 				return false

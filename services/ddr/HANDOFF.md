@@ -638,3 +638,22 @@ system software or buying anything. Keep HANDOFF.md updated as you go.
   - **Known issue:** wheel Up/Down browsing still does not move the wheel
     (pre-existing, out of scope). Random pick + difficulty + play work.
   - Release: `services/ddr/CHANGELOG.md`, tag `v1.0.0`.
+
+- **2026-11-08 — v1.0.1: pad regression fixed (v1.0.0 superseded).**
+  - **What broke the pad (FACT):** v1.0.0's canonical keymap bound the pad's
+    arrows to BOTH the direction buttons and the menu buttons. On a clean OutFox
+    exit it rewrites `Keymaps.ini` and clears one side of each duplicate: the
+    file came back with `1_Down=` and `1_Left=` empty (verified with a single
+    instance + Cmd+Q). That, not padbridge, was why the pad "stopped working".
+  - **Fix:** keymap binds arrows to the gameplay directions ONLY; P2 gets
+    W/A/S/D directions only; menu buttons stay unbound. Verified the minimal
+    keymap survives a clean quit (directions + P2 preserved).
+  - **P2 (FACT):** direction-only arrows are consumed by the base screen before
+    Lua callbacks, so the 1P/2P chooser can't be driven by arrows. P2 late-joins
+    by pressing SPACE on the song screen (`Players joined: P1, P2` verified).
+  - **Difficulty deferred:** OutFox both clears duplicate direction/menu keys on
+    exit and consumes arrows before callbacks, so pad Left/Right cannot also
+    cycle difficulty safely yet. Songs default to Beginner.
+  - Deployed the minimal keymap + theme (metrics/overlay/chooser) to `.54`; game
+    running with `Theme: mermaid-kids`. Removed the failing difficulty test.
+  - Release: tag `v1.0.1`; v1.0.0 marked superseded.

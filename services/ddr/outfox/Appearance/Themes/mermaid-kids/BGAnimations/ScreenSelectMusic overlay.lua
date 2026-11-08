@@ -33,10 +33,11 @@ local function forceEasiest()
 end
 
 return Def.ActorFrame{
-	-- Difficulty is handled by the engine: metrics enable
-	-- ChangeStepsWithGameButtons, and the keymap maps MenuLeft/MenuRight to the
-	-- pad's Left/Right arrows. A custom AddInputCallback here used to consume
-	-- Left/Right and silently fail, so it was removed.
+	-- Difficulty is fixed at Beginner for now (see CHANGELOG v1.0.1): the pad's
+	-- Left/Right must stay bound to the gameplay directions, and OutFox clears a
+	-- key bound to both a direction and a menu button when it rewrites
+	-- Keymaps.ini on exit, which broke the pad. A callback cannot intercept the
+	-- arrows either (ScreenSelectMusic consumes them first).
 	OnCommand=function(self) forceEasiest() end;
 	SongChangedMessageCommand=function(self) forceEasiest() end;
 	MouseWheelUpMessageCommand=function(self)
@@ -67,7 +68,7 @@ return Def.ActorFrame{
 	},
 	Def.BitmapText{
 		Font="Common Normal";
-		Text="Up/Down or Mouse Wheel: Song   Left/Right: Difficulty   Start: Play";
+		Text="Up/Down or Mouse Wheel: Song   Start: Play";
 		InitCommand=function(self)
 			self:xy(SCREEN_CENTER_X, SCREEN_BOTTOM-28):zoom(0.55):shadowlength(1):strokecolor(color("#163742"))
 		end;

@@ -32,15 +32,21 @@ SECTION = "dance"
 
 # action -> device-input value (":" separated bindings)
 CANONICAL: dict[str, str] = {
-    # P1: pad arrows drive both gameplay and the wheel/difficulty menus.
+    # P1: pad arrows are the gameplay directions only.
+    #
+    # Do NOT also bind MenuUp/Down/Left/Right to the same arrows: OutFox resolves
+    # a key bound to two game buttons by clearing one of them when it rewrites
+    # Keymaps.ini on exit, which killed the pad's Down/Left after a restart.
+    # Difficulty is handled by a Lua input callback on the direction buttons
+    # (see ScreenSelectMusic overlay.lua), so the menu buttons can stay unbound.
     "1_Up": "Key_up",
     "1_Down": "Key_down",
     "1_Left": "Key_left",
     "1_Right": "Key_right",
-    "1_MenuUp": "Key_up",
-    "1_MenuDown": "Key_down",
-    "1_MenuLeft": "Key_left",
-    "1_MenuRight": "Key_right",
+    "1_MenuUp": "",
+    "1_MenuDown": "",
+    "1_MenuLeft": "",
+    "1_MenuRight": "",
     "1_Start": "Key_enter",
     "1_Back": "Key_escape",
     "1_Select": "Key_/",
@@ -50,18 +56,18 @@ CANONICAL: dict[str, str] = {
     "1_EffectDown": "",
     "1_UpLeft": "",
     "1_UpRight": "",
-    # P2: W/A/S/D for every direction plus the matching menu buttons.
-    "2_Up": "Key_w::::Key_KP 8",
-    "2_Down": "Key_s::::Key_KP 2",
-    "2_Left": "Key_a::::Key_KP 4",
-    "2_Right": "Key_d::::Key_KP 6",
-    "2_MenuUp": "Key_w::::Key_KP 8",
-    "2_MenuDown": "Key_s::::Key_KP 2",
-    "2_MenuLeft": "Key_a::::Key_KP 4",
-    "2_MenuRight": "Key_d::::Key_KP 6",
-    "2_Start": "Key_space::::Key_KP enter",
+    # P2: W/A/S/D directions only (no menu duplicates).
+    "2_Up": "Key_w",
+    "2_Down": "Key_s",
+    "2_Left": "Key_a",
+    "2_Right": "Key_d",
+    "2_MenuUp": "",
+    "2_MenuDown": "",
+    "2_MenuLeft": "",
+    "2_MenuRight": "",
+    "2_Start": "Key_space",
     "2_Back": "Key_escape",
-    "2_Select": "::::Key_KP 0",
+    "2_Select": "",
     "2_Coin": "",
     "2_Operator": "",
     "2_EffectUp": "",
@@ -88,11 +94,13 @@ FORBIDDEN_IN_DIRECTIONS = {
     "Key_F5",
 }
 
-DIRECTION_ACTIONS = {
-    f"{p}_{d}"
-    for p in ("1", "2")
-    for d in ("Up", "Down", "Left", "Right", "MenuUp", "MenuDown", "MenuLeft", "MenuRight")
+DIRECTION_ONLY = {
+    f"{p}_{d}" for p in ("1", "2") for d in ("Up", "Down", "Left", "Right")
 }
+MENU_ONLY = {
+    f"{p}_Menu{d}" for p in ("1", "2") for d in ("Up", "Down", "Left", "Right")
+}
+DIRECTION_ACTIONS = DIRECTION_ONLY | MENU_ONLY
 
 
 def default_path() -> Path:
@@ -145,6 +153,20 @@ def problems(entries: dict[str, str]) -> list[str]:
         for binding in filter(None, val.split("::::")):
             if binding in FORBIDDEN_IN_DIRECTIONS:
                 out.append(f"{action}: forbidden key {binding!r}")
+
+    # A key bound to both a gameplay direction and the matching menu button is
+    # not stable: OutFox clears one side when it rewrites Keymaps.ini on exit.
+    def keys(actions):
+        out_keys = set()
+        for action in actions:
+            out_keys.update(filter(None, (entries.get(action) or "").split("::::")))
+        return out_keys
+
+    for key in sorted(keys(DIRECTION_ONLY) & keys(MENU_ONLY)):
+        out.append(
+            f"key {key!r} is bound to both a direction and a menu button "
+            "(OutFox clears one on exit)"
+        )
     return out
 
 
