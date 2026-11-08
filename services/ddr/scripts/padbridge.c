@@ -39,7 +39,7 @@ static const CGKeyCode kmap[15] = {
     0,    /* 6  inert */
     0,    /* 7  inert */
     36,   /* 8  Enter (Start) */
-    53,   /* 9  Escape (Back) */
+    0,    /* 9  inert (was Escape/Back -> ejected players from the app) */
     36,   /* 10 Enter (Start) */
     0,    /* 11 inert */
     0,    /* 12 inert */
