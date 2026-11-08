@@ -538,3 +538,48 @@ system software or buying anything. Keep HANDOFF.md updated as you go.
   `~/Library/Caches/Project Out Fox/`; prefs/keymaps at
   `~/Library/Preferences/Project Out Fox/`. `songpacks/` and `media/` are
   gitignored (art not committed).
+- **2026-11-08 — HANDOFF: guardrails + open problems (ordered)**
+
+  ## Guardrails (mandatory working rules here)
+  - Label every substantive claim: **FACT** (seen in output/log/screenshot),
+    **INFERENCE**, or **UNVERIFIED**. Unlabeled = do not state as fact.
+  - Banned until a falsifiable test has actually passed: "fixed", "root cause",
+    "confirmed", "works", "proven". Say "deployed, unverified"; treat causes as
+    hypotheses.
+  - Before acting on a cause, write the test: (1) hypothesis, (2) the observation
+    it predicts, (3) the check that would falsify it. Run it before concluding.
+  - Verify PATHS and that the running process actually uses them before executing
+    or claiming. Resolve prefs/logs/cache dirs via glob `Project*OutFox*` (the
+    literal spacing is a recurring trap). Confirm the process path
+    (`/Applications/OutFox/...`) and that only one theme dir exists.
+  - One hypothesis at a time; mark dead theories dead; do not resurrect them.
+  - Keep a hypothesis ledger. "Command succeeded" ≠ "outcome achieved."
+  - No destructive/cache changes without a scoped hypothesis + backup + revert.
+  - When corrected, state the change immediately; don't defend the prior claim.
+
+  ## Open problems (ordered — owner's order, #1 fixed by owner)
+  1. **Dpad must not be able to exit the game / shift focus to the desktop.**
+     Status: UNVERIFIED / likely still failing. padbridge (`scripts/padbridge.c`)
+     currently maps: usage 1-4 = arrows, 8/10 = Enter (Start), 9 = inert (was 53
+     Escape). Symptom reported: a pad button shifts focus to the desktop (game
+     loses focus). Next (do NOT blind-fix): observe which pad button does it by
+     pressing each while watching `~/Library/Logs/padbridge.log` (usage→key) and
+     whether the game loses focus; identify the exact key; then map that usage to
+     inert or a harmless key, rebuild, and verify the game keeps focus.
+  2. **P2 keyboard input: only 2 of 4 directions register** (Left/Down dead).
+     Status: UNVERIFIED. Keymap has P2=W/A/S/D (hex-verified). Root cause unknown;
+     prior "engine-level" claim was premature. Next: reproduce with a single test
+     and read actual state, not assumptions.
+  3. **Song wheel not reliably randomizing.** Status: UNVERIFIED. A crash from
+     `os.time()` (nil in OutFox Lua) was found and removed; seed now uses
+     `GetTimeSinceStart()` (guarded). Not yet observed working.
+  4. **Wavy HUD lines still visible on gameplay.** Status: UNVERIFIED. Disabled
+     `SongMeterDisplay`/graphs in several files but the element still shows; the
+     actual drawing element has not been identified.
+  5. **Per-song difficulty selection (Left/Right) does nothing.** Status: open,
+     root cause unknown.
+  6. **Crab Rave visual quality** ("looks terrible"). Status: open.
+  7. 2P feature end-to-end not verified (win/fail edges, OUT state, dual input).
+
+  (Owner to continue the ordered list; entries 2-7 are this session's inventory
+  pending the owner's ordering.)
