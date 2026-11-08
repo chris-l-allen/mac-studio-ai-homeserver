@@ -1,5 +1,27 @@
 # Changelog — HomeDDR Kids Station
 
+## v1.0.4 — 2026-11-08
+
+Per-song difficulty is back, controlled with **Up/Down on the song screen**;
+**Start** launches. No keymap changes, so the pad stays fixed.
+
+### Added
+- On the song screen the pad's Up/Down change the difficulty (Up = harder,
+  Down = easier, wrapping Beginner → Easy → Medium → Hard → Challenge). The
+  on-screen label updates live, and the hint reads `Up/Down: Difficulty  Start: Play`.
+- This works because the song screen delivers the pad's Up/Down to a theme input
+  callback (`button=Up/Down`), while gameplay still uses Up/Down as the
+  gameplay directions — the callback only exists on `ScreenSelectMusic`.
+
+### Why this is safe
+- The keymap is still directions-only (P1 arrows, P2 W/A/S/D; menus unbound).
+  No duplicate direction/menu bindings, so OutFox cannot drop the gameplay
+  arrows.
+
+### Verified
+- Local and `.54`: Up → Easy, Up → Medium, Down → Easy, Enter → `ScreenGameplay`.
+- `scripts/run-tests.sh` 13/13; `scripts/test-kids-random.sh` PASS.
+
 ## v1.0.3 — 2026-11-08
 
 Fixes the **"pad only half works"** regression (menus worked, gameplay arrows did not).

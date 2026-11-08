@@ -32,13 +32,57 @@ local function forceEasiest()
 	end)
 end
 
+-- Up/Down on the song screen changes difficulty; Start launches. The keymap
+-- keeps Up/Down bound to the gameplay directions only (no duplicates), and this
+-- callback only exists on ScreenSelectMusic, so gameplay is unaffected.
+local DIFF_ORDER = {"Difficulty_Beginner","Difficulty_Easy","Difficulty_Medium","Difficulty_Hard","Difficulty_Challenge","Difficulty_Edit"}
+local function cycleDifficulty(dir)
+	local ok, err = pcall(function()
+		local song = GAMESTATE:GetCurrentSong()
+		if not song then return end
+		local st = GAMESTATE:GetCurrentStyle():GetStepsType()
+		local byDiff = {}
+		for _, s in ipairs(song:GetAllSteps()) do
+			if s:GetStepsType() == st then
+				byDiff[s:GetDifficulty()] = s
+			end
+		end
+		local order = {}
+		for _, d in ipairs(DIFF_ORDER) do
+			if byDiff[d] then order[#order+1] = byDiff[d] end
+		end
+		if #order == 0 then return end
+		local cur = GAMESTATE:GetCurrentSteps(PLAYER_1)
+		local curDiff = cur and cur:GetDifficulty() or nil
+		local idx = 1
+		for i, s in ipairs(order) do
+			if curDiff and s:GetDifficulty() == curDiff then idx = i end
+		end
+		local chosen = order[((idx - 1 + dir) % #order) + 1]
+		for _, pn in ipairs(GAMESTATE:GetEnabledPlayers()) do
+			GAMESTATE:SetCurrentSteps(pn, chosen)
+		end
+		MESSAGEMAN:Broadcast("CurrentStepsChanged")
+		Trace("DIFF up/down -> "..tostring(chosen:GetDifficulty()))
+	end)
+	if not ok then Trace("DIFF error: "..tostring(err)) end
+end
+
 return Def.ActorFrame{
-	-- Difficulty is fixed at Beginner for now (see CHANGELOG v1.0.1): the pad's
-	-- Left/Right must stay bound to the gameplay directions, and OutFox clears a
-	-- key bound to both a direction and a menu button when it rewrites
-	-- Keymaps.ini on exit, which broke the pad. A callback cannot intercept the
-	-- arrows either (ScreenSelectMusic consumes them first).
-	OnCommand=function(self) forceEasiest() end;
+	OnCommand=function(self)
+		forceEasiest()
+		local top = SCREENMAN:GetTopScreen()
+		if top then
+			top:AddInputCallback(function(event)
+				if event.type ~= "InputEventType_FirstPress" then return false end
+				local b = event.button
+				if b == "Up" then cycleDifficulty(1); return true
+				elseif b == "Down" then cycleDifficulty(-1); return true
+				end
+				return false
+			end)
+		end
+	end;
 	SongChangedMessageCommand=function(self) forceEasiest() end;
 	MouseWheelUpMessageCommand=function(self)
 		local scr = SCREENMAN:GetTopScreen()
@@ -68,7 +112,7 @@ return Def.ActorFrame{
 	},
 	Def.BitmapText{
 		Font="Common Normal";
-		Text="Start: Play";
+		Text="Up/Down: Difficulty   Start: Play";
 		InitCommand=function(self)
 			self:xy(SCREEN_CENTER_X, SCREEN_BOTTOM-28):zoom(0.55):shadowlength(1):strokecolor(color("#163742"))
 		end;

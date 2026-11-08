@@ -695,3 +695,16 @@ system software or buying anything. Keep HANDOFF.md updated as you go.
     without duplicates. Next: spare pad buttons (usage 5/6/...) -> MenuLeft/Right.
   - Synced the stale non-git `.54` checkout.
   - Tests: `run-tests.sh` 13/13; `test-kids-random.sh` PASS. Release: `v1.0.3`.
+
+- **2026-11-08 — v1.0.4: per-song difficulty via Up/Down on the song screen.**
+  - FACT: on `ScreenSelectMusic`, a theme `AddInputCallback` receives the pad's
+    arrows (`button=Up/Down`, `PlayerNumber_P1`), while `Start` is consumed by
+    the screen. The callback exists only on this screen, so gameplay still uses
+    Up/Down as directions.
+  - Implementation: `cycleDifficulty()` in `ScreenSelectMusic overlay.lua` maps
+    Up=+1 / Down=-1 over the song's dance-single charts, calls
+    `GAMESTATE:SetCurrentSteps` for enabled players, broadcasts
+    `CurrentStepsChanged` (label update), and traces `DIFF up/down -> ...`.
+  - Keymap unchanged (directions-only) — no duplication, pad unaffected.
+  - Verified local + `.54`: Up→Easy→Medium, Down→Easy, Enter→ScreenGameplay.
+  - Release: `v1.0.4`.
