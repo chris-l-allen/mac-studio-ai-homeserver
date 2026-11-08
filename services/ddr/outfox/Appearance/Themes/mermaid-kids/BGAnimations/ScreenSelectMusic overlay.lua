@@ -24,6 +24,7 @@ local function forceEasiest()
 			end
 		end
 		if best then
+			Trace("forceEasiest "..tostring(song:GetMainTitle()).." -> "..tostring(best:GetDifficulty()))
 			for _, pn in ipairs(GAMESTATE:GetEnabledPlayers()) do
 				GAMESTATE:SetCurrentSteps(pn, best)
 			end
