@@ -11,6 +11,16 @@ local function difficultyLabel()
 end
 
 return Def.ActorFrame{
+	MouseWheelUpMessageCommand=function(self)
+		local scr = SCREENMAN:GetTopScreen()
+		local w = scr and scr:GetMusicWheel()
+		if w then w:MoveUp() end
+	end,
+	MouseWheelDownMessageCommand=function(self)
+		local scr = SCREENMAN:GetTopScreen()
+		local w = scr and scr:GetMusicWheel()
+		if w then w:MoveDown() end
+	end,
 	Def.Quad{
 		InitCommand=function(self)
 			self:xy(SCREEN_CENTER_X, SCREEN_TOP+34):zoomto(340,40):diffuse(color("#163742")):diffusealpha(0.85)
@@ -26,7 +36,7 @@ return Def.ActorFrame{
 	},
 	Def.BitmapText{
 		Font="Common Normal";
-		Text="Up/Down: Song   Left/Right: Difficulty   Start: Play";
+		Text="Up/Down or Mouse Wheel: Song   Left/Right: Difficulty   Start: Play";
 		InitCommand=function(self)
 			self:xy(SCREEN_CENTER_X, SCREEN_BOTTOM-28):zoom(0.55):shadowlength(1):strokecolor(color("#163742"))
 		end;

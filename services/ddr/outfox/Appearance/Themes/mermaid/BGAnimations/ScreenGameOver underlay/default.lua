@@ -8,7 +8,7 @@ return Def.ActorFrame {
 	-- pastel-pink nautical background
 	Def.Sprite {
 		Texture = THEME:GetPathG("", "fail-bg");
-		InitCommand = function(self) self:center():zoomto(SCREEN_WIDTH, SCREEN_HEIGHT) end,
+		InitCommand = function(self) self:zoomto(SCREEN_WIDTH, SCREEN_HEIGHT) end,
 	},
 
 	-- Hannah's "you failed" video (local-only file, not in git)
@@ -16,7 +16,7 @@ return Def.ActorFrame {
 		Texture = THEME:GetPathG("", "fail.mp4");
 		InitCommand = function(self)
 			if not self then return end
-			self:center():setsize(SCREEN_HEIGHT * 720 / 1280, SCREEN_HEIGHT);
+			self:setsize(SCREEN_HEIGHT * 720 / 1280, SCREEN_HEIGHT);
 		end,
 	},
 
