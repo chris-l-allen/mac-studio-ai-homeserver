@@ -85,7 +85,7 @@ t[#t+1] = LoadActor(THEME:GetPathB("ScreenEvaluation","underlay/PlayerSpecific/O
 t[#t+1] = LoadActor( "./DensityGraph.lua", { Player = Player, Width = 489, Height = 120, NoteData = npsdata, Conf = Conf, Transparent = true } )..{
 	InitCommand=function(self)
 		local yposBG = mainBG:GetZoomedHeight() * .4
-		self:xy( 0, scale( spc, 0, 1, yposBG, -yposBG ) )
+		self:xy( 0, scale( spc, 0, 1, yposBG, -yposBG ) ):visible(false)
 	end
 }
 

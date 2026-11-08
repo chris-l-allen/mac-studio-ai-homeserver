@@ -21,7 +21,7 @@ return Def.ActorFrame{
 
 	-- Passively drawn ActorMultiVertex to cover the out of shape area of the player graph.
 	Def.ActorMultiVertex{
-		Condition=usesGraphOnTop,
+		Condition=false,
 		OnCommand=function(self)
 			-- Construct map of vertices first.
 			local verts = {
@@ -46,7 +46,7 @@ return Def.ActorFrame{
 	},
 
 	LoadActor( "../PlayerSpecific/PlayerGraph.lua", { Player = pn, Width= 147, Height = 41, NoteData = NoteData, UseMask = true } )..{
-		Condition=usesGraphOnTop,
+		Condition=false,
 		OnCommand=function(self) self:xy( 0.2 , 0 ) end
 	},
 
