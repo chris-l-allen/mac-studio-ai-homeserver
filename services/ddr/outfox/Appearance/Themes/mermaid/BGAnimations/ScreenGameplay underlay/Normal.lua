@@ -125,6 +125,7 @@ LoadHUD[#LoadHUD+1] = Def.ActorFrame {
 	},
 
 	Def.SongMeterDisplay{
+		Condition=false,
         OnCommand=function(self)
         	--self:SetStreamWidth( self:GetParent():GetChild("Base"):GetZoomedWidth() )
 			self:SetStreamWidth(HUDWidth + 20)
