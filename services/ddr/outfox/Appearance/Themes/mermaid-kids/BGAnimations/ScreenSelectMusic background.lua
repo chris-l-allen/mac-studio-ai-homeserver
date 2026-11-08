@@ -28,6 +28,11 @@ local function applyKidsWheel()
 			wheel:SelectSong(pool[math.random(#pool)])
 		end
 	end
+	pcall(function()
+		local s = SONGMAN:FindSong("StarrySergal's Flamin Hot Munchies/Crab Rave - [StarrySergal]")
+		Trace("CRAB find="..tostring(s))
+		if s then Trace("CRAB steps="..tostring(#s:GetAllSteps())) end
+	end)
 end
 
 local function applyPartyOptions()
