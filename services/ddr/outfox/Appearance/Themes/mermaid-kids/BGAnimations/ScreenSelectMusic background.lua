@@ -38,7 +38,30 @@ local function applyPartyOptions()
 	end)
 end
 
+local DIFF_RANK = {Difficulty_Beginner=1, Difficulty_Easy=2, Difficulty_Medium=3, Difficulty_Hard=4, Difficulty_Challenge=5, Difficulty_Edit=6}
+local function forceEasiest()
+	pcall(function()
+		local song = GAMESTATE:GetCurrentSong()
+		if not song then return end
+		local st = GAMESTATE:GetCurrentStyle():GetStepsType()
+		local best, bestRank = nil, 99
+		for _, s in ipairs(song:GetAllSteps()) do
+			if s:GetStepsType() == st then
+				local r = DIFF_RANK[s:GetDifficulty()] or 99
+				if r < bestRank then best, bestRank = s, r end
+			end
+		end
+		if best then
+			Trace("forceEasiest(bg) "..tostring(song:GetMainTitle()).." -> "..tostring(best:GetDifficulty()))
+			for _, pn in ipairs(GAMESTATE:GetEnabledPlayers()) do
+				GAMESTATE:SetCurrentSteps(pn, best)
+			end
+		end
+	end)
+end
+
 return Def.ActorFrame{
+	SongChangedMessageCommand=function(self) forceEasiest() end;
 	Def.Sprite{
 		Texture=THEME:GetPathG("", "Mermaid Loading");
 		InitCommand=function(self)
@@ -50,6 +73,7 @@ return Def.ActorFrame{
 		ApplyCommand=function()
 			applyKidsWheel()
 			applyPartyOptions()
+			forceEasiest()
 		end;
 	},
 }
