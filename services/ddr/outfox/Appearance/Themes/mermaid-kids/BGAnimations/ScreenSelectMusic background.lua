@@ -26,7 +26,7 @@ local function applyKidsWheel()
 		end
 		if #pool > 0 then
 			KidPopRoll = (KidPopRoll or 0) + 1
-			math.randomseed(os.time() + KidPopRoll)
+			math.randomseed(KidPopRoll * 7919)
 			wheel:SelectSong(pool[math.random(#pool)])
 		end
 	end
