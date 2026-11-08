@@ -69,6 +69,24 @@ static void value_cb(void *ctx, IOReturn res, void *sender, IOHIDValueRef value)
     if (usage < 15) {
         CGKeyCode key = kmap[usage];
         if (key) {
+            /* Start (usages 8/10) must be a TAP, not a held key. If Enter stays
+             * held while the 1P/2P screen transitions, the song screen sees the
+             * still-held Start and launches immediately ("autostart"), so the
+             * player never gets to pick a difficulty. Posting a short down+up
+             * gives the game a clean tap; release events are ignored. Arrows
+             * stay true held inputs (needed for gameplay). */
+            if (usage == 8 || usage == 10) {
+                if (down) {
+                    CGEventRef d = CGEventCreateKeyboardEvent(NULL, key, true);
+                    CGEventPost(kCGHIDEventTap, d);
+                    CFRelease(d);
+                    usleep(40000); /* 40 ms tap */
+                    CGEventRef u = CGEventCreateKeyboardEvent(NULL, key, false);
+                    CGEventPost(kCGHIDEventTap, u);
+                    CFRelease(u);
+                }
+                return;
+            }
             CGEventRef event = CGEventCreateKeyboardEvent(NULL, key, down != 0);
             CGEventPost(kCGHIDEventTap, event);
             CFRelease(event);

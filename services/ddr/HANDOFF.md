@@ -708,3 +708,14 @@ system software or buying anything. Keep HANDOFF.md updated as you go.
   - Keymap unchanged (directions-only) — no duplication, pad unaffected.
   - Verified local + `.54`: Up→Easy→Medium, Down→Easy, Enter→ScreenGameplay.
   - Release: `v1.0.4`.
+
+- **2026-11-08 — v1.0.5: autostart fixed (padbridge Start is a tap).**
+  - **Cause (FACT):** the pad's Start (Enter) stayed held during the 1P/2P ->
+    song-screen transition; the song screen saw the still-held Start and
+    launched, so difficulty could not be chosen. A synthetic 30-40 ms tap does
+    not autostart.
+  - **Fix:** `padbridge.c` posts Start (usage 8/10) as a down+up 40 ms tap and
+    ignores the HID release for Start; arrows are unchanged (true holds).
+    Rebuilt/reinstalled on `.54` (`~/bin/padbridge`, timestamp 15:22).
+  - Difficulty remains Up/Down on the song screen, then Start to play.
+  - Tests: 14 unit tests (added `test_start_is_tapped`). Release: `v1.0.5`.

@@ -61,3 +61,17 @@ class PadbridgeMapTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PadbridgeTapTests(unittest.TestCase):
+    """Start must be a tap, not a held key.
+
+    If Enter stays held while the 1P/2P screen transitions, the song screen sees
+    the still-held Start and launches immediately ("autostart"), so the player
+    never gets to pick a difficulty.
+    """
+
+    def test_start_is_tapped(self):
+        text = C_SOURCE.read_text()
+        self.assertIn("usage == 8 || usage == 10", text)
+        self.assertRegex(text, r"usleep\(\s*\d+")

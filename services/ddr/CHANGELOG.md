@@ -1,5 +1,26 @@
 # Changelog — HomeDDR Kids Station
 
+## v1.0.5 — 2026-11-08
+
+Fixes **autostart**: the song launched before a difficulty could be picked.
+
+### Fixed
+- The pad's Start (Enter) was held while the 1P/2P screen transitioned to the
+  song screen, so the song screen saw the still-held Start and launched
+  immediately. `padbridge` now sends Start (usages 8/10) as a **40 ms tap**;
+  the arrow buttons remain true held inputs (needed for gameplay). A clean tap
+  does not autostart (verified), so the player lands on the song screen and can
+  choose a difficulty first.
+- Rebuilt and reinstalled `padbridge` on `.54`.
+
+### Difficulty (unchanged, now usable)
+- On the song screen: **Up/Down** changes difficulty (label updates:
+  `DIFFICULTY: Easy` … ), then **Start** plays it.
+
+### Tests
+- Added a padbridge regression test asserting Start is tapped.
+- `scripts/run-tests.sh` — 14 unit tests pass.
+
 ## v1.0.4 — 2026-11-08
 
 Per-song difficulty is back, controlled with **Up/Down on the song screen**;
