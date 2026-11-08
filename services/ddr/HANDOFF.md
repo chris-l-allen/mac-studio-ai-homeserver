@@ -480,3 +480,61 @@ system software or buying anything. Keep HANDOFF.md updated as you go.
   `Stepmania Pop Hits Collection/Shake it off 2`), keep the group line as
   `K-Pop Demon Hunters/*`. `SetPreferredSongs("Kids Pop")` loads
   `{theme}/Other/SongManager Kids Pop.txt`.
+- **2026-11-08 — HANDOFF (state as left, branch `feature/two-player`)**
+
+  **Deployed target:** `.54` (rosinate), OutFox launched with `--theme=mermaid-kids`.
+  Theme at `/Applications/OutFox/Appearance/Themes/mermaid{,-kids}`. Deploy with
+  `tar -C <srcdir> -cf - . | ssh rosinate 'tar -C <dstdir> -xf -'` — **never** rsync
+  here (macOS openrsync + `--backup-dir` deleted files previously).
+
+  **Verified working (1P + 2P):**
+  - First page is a 1P/2P chooser (`ScreenSelectPlayers`, pad-driven). 1P → song
+    select → play. 2P → joins P1+P2, versus **split view** (two note fields, two
+    life bars).
+  - P2 keyboard works: **W A S D + Space** (Start), Esc (back); P1 = pad
+    (arrows + Enter). Keymap at `~/Library/Preferences/Project Out Fox/Keymaps.ini`.
+  - Combined result: `ScreenWin` if ≥1 enabled player reaches the song end, else
+    `ScreenGameOver`; per-player **OUT** indicator when a life bar empties;
+    `FailType_ImmediateContinue` so one player can fail while the other continues.
+  - Kids Pop wheel (`Other/SongManager Kids Pop.txt`): K-Pop (8) + the original
+    Kids Easy/Stepmania set + 16 female-pop tracks (Bad Blood, Wildest Dreams,
+    Blank Space, Style, Chained To The Rhythm, Applause, Bad Romance, Problem,
+    Symphony, Rather Be, The Greatest, I Really Like You, Cool Kids, All About
+    That Bass, Stronger, A Thousand Miles) — all with hi-res art.
+
+  **Known issues / open:**
+  - Per-song **difficulty selection (Left/Right on the wheel) does nothing** — has
+    never worked in this theme. A `forceEasiest` handler in
+    `ScreenSelectMusic background.lua`/`overlay.lua` currently defaults each song
+    to Beginner; an attempted Left/Right cycling input callback did not take.
+    Root cause not yet established (do not assume cache).
+  - **Crab Rave**: originally added by a non-standard generator (SM-style
+    `#NOTES`, **no measure commas** → 0 charts → hidden from the wheel). Re-added
+    via the real `ddr-song-ingest` skill as
+    `StarrySergal's Flamin Hot Munchies/Noisestorm - Crab Rave` (valid `.ssc`,
+    generated art); old `Crab Rave - [StarrySergal]` folder removed and the
+    `StarrySergal's Flamin Hot Munchies` pack symlinked into
+    `/Applications/OutFox/Songs/`. Its on-screen appearance still needs a visual
+    review/polish.
+  - Temporary debug `Trace("CRAB …")` logging remains in
+    `ScreenSelectPlayers underlay/default.lua` and `ScreenSelectMusic background.lua`
+    — remove.
+  - During troubleshooting, `~/Library/Caches/Project Out Fox/song.db` and
+    `Image.db` were deleted and are rebuilt by OutFox. This is **not** part of the
+    normal "add a song" flow and should not be needed.
+
+  **Normal "add a song" pipeline (what to use next time):**
+  1. `python3 ~/.config/opencode/skills/ddr-song-ingest/scripts/ingest_song.py
+     --file <audio> --title "<T>" --artist "<A>" --pack "<Pack>" --art <cover> --no-player`
+     → creates `songpacks/<Pack>/<Artist> - <Title>/` with a valid `.ssc`
+     (`#NOTEDATA` + measure commas), art, audio.
+  2. Append `Pack/FolderName` (exact folder, no glob) to
+     `Other/SongManager Kids Pop.txt`.
+  3. Ship the folder + the SongManager file to `.54` via `tar | ssh`; restart
+     OutFox. Do not clear caches.
+
+  **Other notes:** logs at `~/Library/Logs/Project Out Fox/`
+  (`ProjectOutfox.MainLog.*`, `-mermaid-kids.ThemeLua.*`); caches at
+  `~/Library/Caches/Project Out Fox/`; prefs/keymaps at
+  `~/Library/Preferences/Project Out Fox/`. `songpacks/` and `media/` are
+  gitignored (art not committed).
