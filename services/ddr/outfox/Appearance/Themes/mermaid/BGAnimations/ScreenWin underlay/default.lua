@@ -40,7 +40,7 @@ end
 
 local t = Def.ActorFrame{
 	OnCommand = function(self) self:sleep(5):queuecommand("Advance") end,
-	AdvanceCommand = function(self) SCREENMAN:SetNewScreen("ScreenTitleMenuHome") end,
+	AdvanceCommand = function(self) SCREENMAN:SetNewScreen("ScreenSelectPlayers") end,
 
 	-- backdrop
 	Def.Quad{ InitCommand = function(self) self:FullScreen():diffuse(color("#2A0F3A")) end },

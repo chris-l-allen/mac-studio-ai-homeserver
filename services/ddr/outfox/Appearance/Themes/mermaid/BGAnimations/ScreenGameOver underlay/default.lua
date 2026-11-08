@@ -2,7 +2,7 @@ return Def.ActorFrame {
 	InitCommand = function(self) self:xy(SCREEN_CENTER_X, SCREEN_CENTER_Y) end,
 	OnCommand = function(self) self:sleep(4.5):queuecommand("Advance") end,
 	AdvanceCommand = function(self)
-		SCREENMAN:SetNewScreen("ScreenTitleMenuHome")
+		SCREENMAN:SetNewScreen("ScreenSelectPlayers")
 	end,
 
 	-- pastel-pink nautical background

@@ -158,7 +158,7 @@ Branch.TitleMenu = function()
 	if GAMESTATE:GetCoinMode() ~= "CoinMode_Home" then
 		return "ScreenTitleMenuJoin"
 	end
-	return "ScreenTitleMenuHome"
+	return "ScreenSelectPlayers"
 end
 
 local function IsKidsTheme()
