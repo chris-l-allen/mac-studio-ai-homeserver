@@ -432,3 +432,14 @@ system software or buying anything. Keep HANDOFF.md updated as you go.
   `Branch.AfterGameplay` (incomplete → `ScreenGameOver`) both route to the fail
   video → home. Deployed to `.54` and restarted. **KEY LESSON: the owner plays on
   `.54` (Rocinante); deploy there, not just the local laptop install.**
+- **2026-11-07** — Miss-fail calibrated to **30**: the per-miss drains live in
+  `[LifeMeterBar]` (starts at `InitialValue=0.5`), **not** `[Gameplay]` — that's
+  why all earlier drain edits did nothing (the theme used the `_fallback`
+  `LifePercentChangeMiss=-0.080`, i.e. ~6 misses). Fix: theme `[LifeMeterBar]`
+  `LifePercentChangeMiss=-0.0167` (others scaled) → bar empties after ~30 misses.
+  Also `applyPartyOptions` now calls
+  `GetPlayerOptions("ModsLevel_Preferred"):FailSetting("FailType_Immediate")` (the
+  old `po.NoFail=false` was an invalid no-op), and the life watcher
+  (`LifeMeter:GetLife() <= 0.01` → `SCREENMAN:SetNewScreen("ScreenGameOver")`)
+  routes to the fail video. Verified trace: `mermaid life empty -> fail,
+  misses=30` → `ScreenGameOver`.

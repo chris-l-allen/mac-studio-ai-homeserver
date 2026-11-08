@@ -356,17 +356,16 @@ if not GAMESTATE:IsDemonstration() then
 	end
 end
 
--- fail when life is actually empty (the active life type / No-Fail may not fail on its own)
+-- fail when the life bar empties (drain is in [LifeMeterBar]; ~30 misses)
 t[#t+1] = Def.Actor{
-	InitCommand=function(self)
-		local ok, ls = pcall(function() return GAMESTATE:GetPlayerState(PLAYER_1):GetCurrentPlayerOptions():LifeSetting() end)
-		Trace("mermaid LifeSetting P1 = "..tostring(ok and ls))
-	end,
 	LifeChangedMessageCommand=function(self, params)
-		if params.Player ~= PLAYER_1 or self.failed or not params.LifeMeter then return end
-		if params.LifeMeter:GetLife() <= 0.01 then
+		if params.Player ~= PLAYER_1 or self.failed then return end
+		if params.LifeMeter and params.LifeMeter:GetLife() <= 0.01 then
 			self.failed = true
-			Trace("mermaid life empty -> fail")
+			local stats = STATSMAN:GetCurStageStats()
+			local ps = stats and stats:GetPlayerStageStats(PLAYER_1)
+			local misses = ps and ps:GetTapNoteScores("TapNoteScore_Miss") or -1
+			Trace("mermaid life empty -> fail, misses="..tostring(misses))
 			SCREENMAN:SetNewScreen("ScreenGameOver")
 		end
 	end,

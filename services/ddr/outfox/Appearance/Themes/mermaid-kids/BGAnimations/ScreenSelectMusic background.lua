@@ -32,13 +32,9 @@ end
 
 local function applyPartyOptions()
 	local pn = PLAYER_1
-	local ok, po = pcall(function()
-		return GAMESTATE:GetPlayerState(pn):GetPlayerOptions()
+	pcall(function()
+		GAMESTATE:GetPlayerState(pn):GetPlayerOptions("ModsLevel_Preferred"):FailSetting("FailType_Immediate")
 	end)
-	if ok and po then
-		po.NoFail = false
-		pcall(function() GAMESTATE:ApplyPlayerOptions(pn, po) end)
-	end
 end
 
 return Def.ActorFrame{
