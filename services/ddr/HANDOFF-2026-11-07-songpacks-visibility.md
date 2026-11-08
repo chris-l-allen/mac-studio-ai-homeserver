@@ -1,7 +1,14 @@
 # HANDOFF — 2026-11-07 — "K-Pop Demon Hunters / Baby Shark / Alvin not visible in OutFox"
 
-**Status: BLOCKED (incomplete). The 3 new songs are installed and linked, but we have NOT
-yet confirmed a clean scan of them by the running game. Do NOT assume done.**
+**Status: BLOCKED (incomplete). The 3 new packs are installed, linked, and have assets +
+`.sm` charts present, but we have NOT yet confirmed a clean scan of them by the running
+game. Do NOT assume done.**
+
+> NOTE (added this session): An earlier "active summary" in this thread was partly stale.
+> It claimed `ingest_song.py` was updated/active in `services/ddr/scripts/`. It actually
+> lives in the **skill** dir `skills/ddr-song-ingest/scripts/` (committed, clean in git).
+> The 8 KPDH song dirs were already ingested on Nov 7 10:49 (full assets + `.sm` + `.ssc`).
+> See "Ingestion script" section below.
 
 ---
 
@@ -9,6 +16,8 @@ yet confirmed a clean scan of them by the running game. Do NOT assume done.**
 
 - The 3 target packs are **installed AND symlinked into the dir OutFox scans**, and all
   symlinks **resolve to real `.sm` files** (verified with a script). ✔
+- The 8 KPDH song dirs each have the expected asset set (`-banner/-bg/-cover/-cd.png`,
+  `.ogg`, `.sm`, `.ssc`) — verified by `ls`.
 - OutFox is **NOT currently running** (`ps aux | grep -i outfox` → nothing). No OutFox log
   has been written in the last 60 min.
 - The **last real game log session** is `00:19:53–00:43:25` — it scanned ONLY the old songs
@@ -68,6 +77,12 @@ copied the 3 packs from `.54` → local `songpacks/`, and added the 3 missing sy
 5. Confirmed via the 00:19 MainLog that the app scans `/Songs/<Pack>/<Artist - Title>` paths
    (e.g. `Song::LoadFromSongDir(/Songs/Kids Easy/Disney - A Dream Is a Wish Your Heart Makes)`).
    So the scan root is `/Users/callen/Applications/OutFox/Songs/` — exactly where our links are.
+6. **Located `ingest_song.py`** (the active summary had it in the wrong dir):
+   - Real path: `~/mac-studio-ai-homeserver/skills/ddr-song-ingest/scripts/ingest_song.py`
+     (13,846 bytes, committed, clean in git).
+   - Sibling files in the skill dir: `SKILL.md`, `ARCHITECTURE.md`, `purchase_song.py`.
+   - It is **NOT** in `services/ddr/scripts/` (that dir has `build-player.py`, which
+     `ingest_song.py` likely calls for local target).
 
 ### Minor non-issues I checked
 - `pack.ini`: `K-Pop Demon Hunters/` HAS one; the other 2 new packs and the OLD visible packs
@@ -100,6 +115,29 @@ copied the 3 packs from `.54` → local `songpacks/`, and added the 3 missing sy
 
 ---
 
+## Ingestion script (reconciled this session)
+
+- **Real location**: `~/mac-studio-ai-homeserver/skills/ddr-song-ingest/scripts/ingest_song.py`
+- **Companion files** in the same skill dir: `SKILL.md`, `ARCHITECTURE.md`, `purchase_song.py`
+- **Asset contract it emits** (per the active summary):
+  - `<prefix>-banner.png` (1024×400)
+  - `<prefix>-bg.png` (1920×1080)
+  - `<prefix>-cover.png` (300×300)
+  - `<prefix>-cd.png` (612×400)
+  - `#DISCIMAGE` empty.
+- **CLI flags** (per the active summary): `--prefix`, `--target`, `--remote` (`local` is default).
+- **Local deploy path** (default `--target local`):
+  `~/mac-studio-ai-homeserver/services/ddr/songpacks/<Pack>/<Artist - Title>/`
+- **Remote deploy path** (`--remote`): target `callen@10.0.0.54`, root
+  `/Users/callen/mac-studio-ai-homeserver/services/ddr/songpacks`. Method: `tar | ssh` (not `scp`).
+- The 8 KPDH song dirs already contain the expected asset set + `.sm` + `.ssc` (timestamps
+  Nov 7 10:49), consistent with a prior local ingest run.
+
+> TODO: verify the CLI flags / asset contract above against the actual `ingest_song.py`
+> source — the active summary's description was not re-read against the file this session.
+
+---
+
 ## Key paths
 
 | What | Where |
@@ -108,15 +146,20 @@ copied the 3 packs from `.54` → local `songpacks/`, and added the 3 missing sy
 | **Song scan dir (symlinks)** | `/Users/callen/Applications/OutFox/Songs/` |
 | **LOCAL songpacks (what's read)** | `/Users/callen/mac-studio-ai-homeserver/services/ddr/songpacks/` |
 | `.54` songpacks (mirror, via `ssh rosinate`) | `/Users/callen/mac-studio-ai-homeserver/services/ddr/songpacks/` (same path, different box) |
+| **Ingest skill (script + docs)** | `/Users/callen/mac-studio-ai-homeserver/skills/ddr-song-ingest/` |
 | Game logs | `/Users/callen/Library/Logs/Project OutFox/` (`…MainLog.<date>--<hh.mm.ss>.log`) |
 | Song config | `/Users/callen/Applications/OutFox/Data/DefaultSongPreferences.ini`, `NamesBlacklist.txt` |
 | Content index | `/Users/callen/workspace/ddr-content-index.md` |
-| Linking script (note: it looks at `~/Library/Application Support/…` dirs, NOT `/Users/callen/Applications/OutFox/Songs`) | `scripts/link-songpacks.sh` |
-| Kids curation scripts | `scripts/build-kids-easy.py`, `scripts/curate.py` |
+| Linking script (note: it looks at `~/Library/Application Support/…` dirs, NOT `/Users/callen/Applications/OutFox/Songs`) | `services/ddr/scripts/link-songpacks.sh` |
+| Kids curation scripts | `services/ddr/scripts/build-kids-easy.py`, `services/ddr/scripts/curate.py` |
+| Local build helper (called by ingest for `--target local`) | `services/ddr/scripts/build-player.py` |
 
 ## Notes / gotchas for next time
 - **Two machines, same path** — always confirm which copy OutFox actually reads. The running
   app reads the **LOCAL** checkout. `ssh rosinate` = `.54` is a *separate* working copy.
+- **`ingest_song.py` lives in the skill dir**, not `services/ddr/scripts/`. Don't confuse it
+  with `build-player.py`. If you need the ingestion entrypoint, look under
+  `skills/ddr-song-ingest/scripts/`.
 - `pgrep -f OutFox.app` can match your own shell command if the pattern is in it — use
   `pgrep -x OutFox` or `ps aux | grep 'OutFox.app/Contents/MacOS/OutFox' | grep -v grep`.
 - The `Scripts/` + `Data/` + `Songs/` + `Appearance/` layout under

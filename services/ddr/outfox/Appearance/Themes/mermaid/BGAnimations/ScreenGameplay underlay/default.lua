@@ -10,7 +10,7 @@ local t = Def.ActorFrame{
 local AspectRatio = GetScreenAspectRatio()
 local IsVerticalScreen = AspectRatio < 1
 local needsGeneralDetailedStats = false
-local allowTouch = LoadModule("Config.Load.lua")("UseTouchControls","OutFoxPrefs.ini")
+local allowTouch = false -- guest/kids: disable mouse/touch give-up (accidental ends)
 local isDoublePlay = GAMESTATE:GetCurrentStyle():GetStyleType() == "StyleType_OnePlayerTwoSides"
 
 -- Before we get started, check if both players have reverse enabled. This is to check for general UI positions.
@@ -355,5 +355,21 @@ if not GAMESTATE:IsDemonstration() then
 		t[#t+1] = LoadActor(THEME:GetPathB("_Attract","PlayerButtons"), true)
 	end
 end
+
+-- fail when life is actually empty (the active life type / No-Fail may not fail on its own)
+t[#t+1] = Def.Actor{
+	InitCommand=function(self)
+		local ok, ls = pcall(function() return GAMESTATE:GetPlayerState(PLAYER_1):GetCurrentPlayerOptions():LifeSetting() end)
+		Trace("mermaid LifeSetting P1 = "..tostring(ok and ls))
+	end,
+	LifeChangedMessageCommand=function(self, params)
+		if params.Player ~= PLAYER_1 or self.failed or not params.LifeMeter then return end
+		if params.LifeMeter:GetLife() <= 0.01 then
+			self.failed = true
+			Trace("mermaid life empty -> fail")
+			SCREENMAN:SetNewScreen("ScreenGameOver")
+		end
+	end,
+}
 
 return t

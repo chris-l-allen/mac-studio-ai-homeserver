@@ -13,10 +13,8 @@ local resize = LoadModule("Lua.Resize.lua")
 
 -- List of menu options available
 local profileOrTutorial = function()
-	if PROFILEMAN:GetNumLocalProfiles() == 0 then
-		return "ScreenProfileLoad"
-	end
-	return "ScreenSelectProfile"
+	-- guest-only: join straight to the song wheel, never a profile screen
+	return "ScreenSelectMusic"
 end
 
 local t = Def.ActorFrame{}

@@ -1,4 +1,6 @@
 return function( args )
+	-- guest mode: hide the profile score / chart info pane
+	return Def.ActorFrame{}
 	local t = Def.ActorFrame{
 		Name="ChartInfo",
 		["CurrentSteps"..ToEnumShortString(args.Player) .."ChangedMessageCommand"]=function(self,params)

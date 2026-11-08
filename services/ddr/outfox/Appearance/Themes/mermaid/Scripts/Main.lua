@@ -180,6 +180,19 @@ Branch.AfterInit = function()
 	]]
 end
 
+Branch.AfterGameplay = function()
+	local stats = STATSMAN:GetCurStageStats()
+	if stats and stats:AllFailed() then return "ScreenGameOver" end
+	-- gave up / didn't finish (alive < song length) -> fail video -> home
+	local pn = GAMESTATE:GetMasterPlayerNumber()
+	local ps = stats and stats:GetPlayerStageStats(pn)
+	local song = GAMESTATE:GetCurrentSong()
+	if ps and song and ps:GetAliveSeconds() < (song:MusicLengthSeconds() - 1) then
+		return "ScreenGameOver"
+	end
+	return "ScreenEvaluationNormal"
+end
+
 Branch.AfterProfileLoad = function()
 	if IsKidsTheme() then return "ScreenSelectMusic" end
 	if IsClassicTheme() then return "ScreenSelectMusic" end

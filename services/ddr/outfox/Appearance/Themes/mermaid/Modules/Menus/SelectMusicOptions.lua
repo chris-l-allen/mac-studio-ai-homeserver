@@ -585,11 +585,6 @@ return {
             MESSAGEMAN:Broadcast("ToggleLeaderboard",{ Player = player })
         end,
     },
-    {
-        Icon = THEME:GetPathG("","TitleMenuIcon/Profiles"),
-        Name = "Change Profile",
-        Menu = profileList,
-        SkipIf = GAMESTATE:GetCoinMode() == "CoinMode_Pay" and not GAMESTATE:IsEventMode()
-    },
+    -- guest-only: "Change Profile" option removed (no profile system)
     { Icon = THEME:GetPathG("","UI/Back"), Name = "Exit Menu", Type="message", Value = "LeavingOptionsMenu" },
 }

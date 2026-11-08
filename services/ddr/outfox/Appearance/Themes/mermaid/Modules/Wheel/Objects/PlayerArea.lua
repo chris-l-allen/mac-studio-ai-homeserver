@@ -1,4 +1,6 @@
 return function( args )
+	-- guest mode: hide the profile bar (avatar / name / goal)
+	return Def.ActorFrame{}
 	local pn = args.Player
 	local isOnline = args.isOnline or false
 	local width = args.Width

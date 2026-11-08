@@ -1,5 +1,9 @@
 return Def.ActorFrame {
 	InitCommand = function(self) self:xy(SCREEN_CENTER_X, SCREEN_CENTER_Y) end,
+	OnCommand = function(self) self:sleep(7):queuecommand("Advance") end,
+	AdvanceCommand = function(self)
+		SCREENMAN:SetNewScreen("ScreenTitleMenuHome")
+	end,
 
 	-- pastel-pink nautical background
 	Def.Sprite {
@@ -25,4 +29,5 @@ return Def.ActorFrame {
 			    :zoomto(SCREEN_WIDTH * 0.73, SCREEN_WIDTH * 0.73 * 480 / 1920);
 		end,
 	},
+
 }

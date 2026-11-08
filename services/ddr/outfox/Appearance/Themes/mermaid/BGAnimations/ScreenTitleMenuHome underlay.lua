@@ -25,16 +25,13 @@ local profileOrTutorial = function()
     if SONGMAN:GetNumSongs() == 0 then
         return "ScreenHowToInstallSongs"
     end
-    if PROFILEMAN:GetNumLocalProfiles() == 0 then
-        return "ScreenProfileLoad"
-    end
-    return "ScreenSelectProfile"
+    -- guest mode: skip profiles entirely, go straight to song select
+    return "ScreenSelectMusic"
 end
 local MenuList = {
     {
         {"Play Now", profileOrTutorial(), 0},
-        {"Profiles", "ScreenOptionsManageProfiles"},
-        {"Fitness", "ScreenSelectProfileFitness", -1},
+        -- guest-only: Profiles and Fitness removed (no profile system)
     },
     {
         {"Settings", "OptionsMenu", 0},
@@ -314,6 +311,5 @@ if NETMAN then
     )
 end
 
-t[#t+1] = leftPaneArea
-
+-- t[#t+1] = leftPaneArea  -- hidden: removed game-mode dropdown box
 return t

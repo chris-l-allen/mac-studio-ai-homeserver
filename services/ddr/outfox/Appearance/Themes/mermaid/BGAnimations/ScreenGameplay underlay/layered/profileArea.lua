@@ -77,9 +77,9 @@ return Def.ActorFrame{
 		Def.BitmapText{ Name="ChartAuthor", Font="Common Normal" }
 	},
 
-	-- Avatar
+	-- Avatar (hidden: guest mode, no profile system)
 	Def.Sprite {
 		Texture=LoadModule("Options.GetProfileData.lua")(pn)["Image"],
-		InitCommand=function(self) self:xy( -self:GetParent():GetChild("Base"):GetZoomedWidth()*.25, -1 ):zoomto(36,36) end
+		InitCommand=function(self) self:xy( -self:GetParent():GetChild("Base"):GetZoomedWidth()*.25, -1 ):zoomto(36,36):visible(false) end
 	}
 }

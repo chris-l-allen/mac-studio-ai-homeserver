@@ -1,4 +1,6 @@
 return function(args)
+	-- guest mode: hide the preview notefield / player profile pane
+	return Def.ActorFrame{}
 	local pn = args.Player
 
 	if not GAMESTATE:GetCurrentStyle() then

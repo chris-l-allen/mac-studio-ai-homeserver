@@ -125,7 +125,7 @@ t[#t+1] = Def.ActorFrame{
                 GAMESTATE:JoinInput( params.PlayerNumber )
                 GAMESTATE:SetCurrentStyle("single")
                 GAMESTATE:SetCurrentPlayMode("regular")
-                SCREENMAN:GetTopScreen():SetNextScreenName("ScreenProfileLoad"):StartTransitioningScreen( "SM_GoToNextScreen" )
+                SCREENMAN:GetTopScreen():SetNextScreenName("ScreenSelectMusic"):StartTransitioningScreen( "SM_GoToNextScreen" )
             end
         end
     end,

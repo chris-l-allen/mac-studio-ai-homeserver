@@ -5,14 +5,14 @@ setenv("sectionWheelItemColorB", color("#F400F4"))
 local function applyKidsWheel()
 	local screen = SCREENMAN:GetTopScreen()
 	if not screen then return end
-	SONGMAN:SetPreferredSongs("Kids Easy")
+	SONGMAN:SetPreferredSongs("K-Pop Demon Hunters")
 	local wheel = screen:GetMusicWheel()
 	if wheel then
 		wheel:ChangeSort("SortOrder_Preferred")
 		local rate = tonumber(THEME:GetMetric("KidsDDR", "MusicRate")) or 1.0
 		local opts = GAMESTATE:GetSongOptionsObject("ModsLevel_Preferred")
 		if opts then opts:MusicRate(rate) end
-		local groups = {"Kids Easy", "Stepmania Pop Hits Collection"}
+		local groups = {"K-Pop Demon Hunters"}
 		local pool = {}
 		for _, g in ipairs(groups) do
 			local ok, songs = pcall(function() return SONGMAN:GetSongsInGroup(g) end)

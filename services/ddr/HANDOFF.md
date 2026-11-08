@@ -328,3 +328,107 @@ system software or buying anything. Keep HANDOFF.md updated as you go.
   `bg.png`/`cd.png`/`*-bn(2).png` kept for rollback. UNVERIFIED in a live OutFox
   render. NOTE: done in the LOCAL checkout (what running OutFox reads); the `.54`
   (`ssh rosinate`) copy still has the old art — sync if that box matters.
+- **2026-11-07** — Theme pass for the kid setup (LOCAL checkout + local install
+  only; NOT pushed to `.54` yet — owner reviewing). Changes:
+  - `mermaid/BGAnimations/ScreenTitleMenuHome underlay.lua`: hide the top-left
+    game-mode dropdown/connect box (`t[#t+1] = leftPaneArea` commented out).
+  - `mermaid/Modules/UI/UI.MainMenu.lua`: "Play Now" goes straight to
+    `ScreenSelectMusic` as guest (skips `ScreenSelectProfile`).
+  - `mermaid-kids/BGAnimations/ScreenSelectMusic background.lua`: wheel preferred
+    group switched `Kids Easy` → `K-Pop Demon Hunters` (fixes the empty wheel).
+  - `mermaid-kids/Other/SongManager K-Pop Demon Hunters.txt`: REQUIRED companion
+    for the new preferred group — the engine looks up `Other/SongManager <group>`.
+    Without it, opening SelectMusic throws `Theme element ... could not be found`
+    and OutFox exits (observed/fixed 2026-11-07).
+  - `mermaid/Scripts/Main.lua` + `metrics.ini`: added `Branch.AfterGameplay`
+    (returns `ScreenGameOver` when `AllFailed`, else `ScreenEvaluationNormal`)
+    and set `[ScreenGameplay] NextScreen=Branch.AfterGameplay()`; kids
+    `[ScreenGameOver] NextScreen="ScreenSelectMusic"` so the fail video plays then
+    returns to the wheel. Failure routing UNVERIFIED (needs a live fail test).
+  - K-Pop backgrounds regenerated: sharp cover panel on a soft ambient instead of
+    the 28px blur (`/tmp/gen_bg.py`); originals backed up to
+    `services/ddr/archive/kpdh-bg-orig/`.
+  - Verified locally: theme loads, 8 songs found, dropdown gone. Wheel/guest/fail
+    flow need an owner play-test. "PROFILES" menu button left in place.
+- **2026-11-07** — Guest mode, no profile system (owner requirement). Fixed the
+  *actual* Play Now source (`ScreenTitleMenuHome underlay.lua` `profileOrTutorial`
+  now returns `"ScreenSelectMusic"`), and hid the profile UI: song-select profile
+  bar / score graph / preview notefield (`Modules/Wheel/Objects/{PlayerArea,
+  ChartInfo,Notefield}.lua` return empty), evaluation profile bar (same module),
+  and the in-game avatar (`ScreenGameplay underlay/layered/profileArea.lua`).
+  Verified: `TitleMenuHome -> ScreenSelectMusic` directly (no profile screen),
+  the dark profile panel on song select is gone, K-pop wheel still lists 8 songs.
+  Still present: main-menu "Profiles" button (hide needs a grid-skip adjustment)
+  and the song-select "Hannah" collage background (theme art, not profile data).
+- **2026-11-07** — CORRECTION: the "dark box in the top-left" was on the
+  **gameplay** screen, not song select. Cause (verified with flat-gray song
+  backgrounds): `mermaid-kids/BGAnimations/ScreenGameplay underlay.lua` drew its
+  35% dim with `zoomto(SCREEN_WIDTH, SCREEN_HEIGHT)` on a quad anchored at (0,0),
+  so only the top-left quadrant darkened. Fixed to `FullScreen()` (uniform dim).
+  Post-fix flat-gray test is uniform (~59) with no quadrant darkening. The earlier
+  "song-select dark box gone" claim was **wrong** — that screen was a different
+  screen; the song-select profile panels do not draw this box.
+- **2026-11-07** — Owner wants **no gameplay dim** and the full HUD. Removed
+  `mermaid-kids/BGAnimations/ScreenGameplay underlay.lua` entirely (archived to
+  `archive/theme-review-baks/ScreenGameplay underlay.lua.guest`). Note: an
+  **empty** file of that name still shadows the base HUD (score/lifebar/stage/
+  timer disappear); deleting it loads `mermaid/BGAnimations/ScreenGameplay
+  underlay/default.lua` — full HUD, no kids dim box. Flat-gray test suggested a
+  residual ~0.7 factor; no hard box, possibly capture color-profile — unverified.
+- **2026-11-07** — PUSHED to `.54` (`rosinate`) per owner: rsynced `mermaid` +
+  `mermaid-kids` themes (`--delete`; only the kids `ScreenGameplay underlay.lua`
+  was removed) and the 8 `K-Pop Demon Hunters/*/*-bg.png` (local/remote md5 match:
+  `f29d1b2f…` for Your Idol). Restarted via `~/Desktop/DDR.app`. Verified remote:
+  underlay gone, `ScreenTitleMenuHome underlay` returns `ScreenSelectMusic`,
+  `SongManager K-Pop Demon Hunters.txt` present. Could not screencapture `.54`
+  over SSH ("could not create image from display"). Fail-video path still
+  UNVERIFIED on `.54`.
+- **2026-11-07** — Guest-only system (LOCAL, verified): removed the "Profiles" and
+  "Fitness" main-menu buttons (`UI.MainMenu.lua` `buttonInfo` + `ScreenTitleMenuHome
+  underlay.lua` `MenuList`); attract/join buttons and the free-play join now go to
+  `ScreenSelectMusic` (`_Attract PlayerButtons.lua`, `ScreenTitleMenuJoin
+  underlay.lua`); removed "Change Profile" from the song-select options
+  (`Modules/Menus/SelectMusicOptions.lua`). Verified locally: menu shows Play Now /
+  Settings / Editor / Jukebox / Quit only; log `ScreenTitleMenuHome ->
+  ScreenSelectMusic` (no `ScreenSelectProfile`); K-pop wheel loads; no exceptions.
+  NOT pushed to `.54` yet; `.54` `DefaultLocalProfileIDP1` still to clear.
+- **2026-11-07** — FAIL-CRASH FIX (pushed to `.54`): on fail the kids
+  `[ScreenGameOver] NextScreen="ScreenSelectMusic"` sent the game to song select
+  with **0 joined players** → FATAL "No compatible styles for dance with 0
+  players" (SIGABRT, app exits). Removed the kids `[ScreenGameOver]` override so
+  the base applies: `ScreenGameOver` (fail.mp4, 6.79s) → 8s timer → `NextScreen=
+  "ScreenInit"` → `Branch.AfterInit()` → `Branch.TitleMenu()` → `ScreenTitleMenuHome`
+  (back to start). Pushed `mermaid-kids/metrics.ini` to `.54` and restarted;
+  verified base `NextScreen="ScreenInit"`, `TimerSeconds=8`, no kids override.
+  Runtime fail not reproduced locally (Beginner forgiving at 86 misses) — owner to
+  confirm on `.54`.
+- **2026-11-07** — Fail page simplified (owner: "just the video and the reset"):
+  `ScreenGameOver` now uses `Class="ScreenWithMenuElements"` (was `ScreenEnding`
+  → `ScreenAttract`, which drew the engine's Continue/Screenshot menu), with
+  header/footer/help/back hidden and `ResetGameState=true`. The underlay fires
+  `SCREENMAN:SetNewScreen("ScreenTitleMenuHome")` after 7s, so fail → fail.mp4
+  (~6.8s) → title (back to start), no menu. Verified locally: log
+  `ScreenGameOver → ScreenTitleMenuHome` after ~7s, video shown, no buttons.
+  Pushed `mermaid` + `mermaid-kids` themes to `.54` (also carries the guest-only
+  menu changes) and restarted; verified Class, auto-reset call, no kids override,
+  no `ScreenOptionsManageProfiles` in the main menu.
+- **2026-11-07** — "Song ends right away / weird circle screen" fix: the engine's
+  hold-Start give-up (`[ScreenGameplay] StartGivesUp=true`, `GiveUpSeconds=2.5`)
+  plus the base gameplay HUD's `UI.HoldClickArea` (mouse-hold give-up, exposed
+  when the kids underlay was removed) posted `SM_NotesEnded` (`m_gave_up=1`) →
+  `ScreenEvaluationNormal` (the "circle" result page), not the fail video. Fix:
+  `[ScreenGameplay] StartGivesUp=false` and `allowTouch=false` in
+  `ScreenGameplay underlay/default.lua`. Pause-menu Give Up still works. Verified
+  locally (song starts `ScreenGameplay` and keeps playing, no give-up); pushed to
+  `.54` and restarted. NOTE: a running OutFox keeps old metrics in memory — always
+  restart after metric edits.
+- **2026-11-07** — Miss-fail now actually works: added a watcher in
+  `ScreenGameplay underlay/default.lua` (`LifeChangedMessage` →
+  `LifeMeter:GetLife() <= 0.01` → `SCREENMAN:SetNewScreen("ScreenGameOver")`).
+  Verified in the theme log: `mermaid LifeSetting P1 = LifeType_Bar`, then
+  `mermaid life empty -> fail` → `ScreenGameOver`. Drain `LifePercentChangeMiss=
+  -0.010` (~100 missed notes to empty the bar, 8× more forgiving than the -0.08
+  default). Hold-Select give-up (`StartGivesUp=true`, `GiveUpSeconds=3`) and
+  `Branch.AfterGameplay` (incomplete → `ScreenGameOver`) both route to the fail
+  video → home. Deployed to `.54` and restarted. **KEY LESSON: the owner plays on
+  `.54` (Rocinante); deploy there, not just the local laptop install.**

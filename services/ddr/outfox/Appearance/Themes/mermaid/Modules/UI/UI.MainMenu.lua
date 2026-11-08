@@ -32,10 +32,8 @@ return function (MenuList, QuadSize, MarginArea, ButtonAreaY, DropdownMT)
         if SONGMAN:GetNumSongs() == 0 then
             return "ScreenHowToInstallSongs"
         end
-        if PROFILEMAN:GetNumLocalProfiles() == 0 then
-            return "ScreenProfileLoad"
-        end
-        return "ScreenSelectProfile"
+        -- default to guest: skip profile selection
+        return "ScreenSelectMusic"
     end
 
     local quadWidth = tonumber(QuadSize[1] - 10)
@@ -44,8 +42,7 @@ return function (MenuList, QuadSize, MarginArea, ButtonAreaY, DropdownMT)
     local buttonInfo = {
         {
             {ButtonPosFunc.x(1), ButtonPosFunc.y(1), quadWidth, quadHeight, upSkip={3,1}, downSkip={3,1}, metaData = {"Play Now", profileOrTutorial(), "Corner", 0}},
-            {ButtonPosFunc.x(2), ButtonPosFunc.y(1), quadWidth, quadHeight, upSkip={3,2}, downSkip={3,2}, metaData = {"Profiles", "ScreenOptionsManageProfiles", "Middle"}},
-            {ButtonPosFunc.x(3), ButtonPosFunc.y(1), quadWidth, quadHeight, upSkip={3,3}, rightSkip=ThreeButtonComp and {3,1} or {1,1}, metaData = {"Fitness", "ScreenSelectProfileFitness", "Corner", -1}},
+            -- guest-only: Profiles and Fitness removed (no profile system)
         },
         {
             -- Should be small
