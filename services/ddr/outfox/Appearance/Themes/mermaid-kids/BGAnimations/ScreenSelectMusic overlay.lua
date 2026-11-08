@@ -10,7 +10,30 @@ local function difficultyLabel()
 	return "DIFFICULTY: " .. ToEnumShortString(steps:GetDifficulty())
 end
 
+local DIFF_RANK = {Difficulty_Beginner=1, Difficulty_Easy=2, Difficulty_Medium=3, Difficulty_Hard=4, Difficulty_Challenge=5, Difficulty_Edit=6}
+local function forceEasiest()
+	pcall(function()
+		local song = GAMESTATE:GetCurrentSong()
+		if not song then return end
+		local st = GAMESTATE:GetCurrentStyle():GetStepsType()
+		local best, bestRank = nil, 99
+		for _, s in ipairs(song:GetAllSteps()) do
+			if s:GetStepsType() == st then
+				local r = DIFF_RANK[s:GetDifficulty()] or 99
+				if r < bestRank then best, bestRank = s, r end
+			end
+		end
+		if best then
+			for _, pn in ipairs(GAMESTATE:GetEnabledPlayers()) do
+				GAMESTATE:SetCurrentSteps(pn, best)
+			end
+		end
+	end)
+end
+
 return Def.ActorFrame{
+	OnCommand=function(self) forceEasiest() end;
+	SongChangedMessageCommand=function(self) forceEasiest() end;
 	MouseWheelUpMessageCommand=function(self)
 		local scr = SCREENMAN:GetTopScreen()
 		local w = scr and scr:GetMusicWheel()
