@@ -679,3 +679,19 @@ system software or buying anything. Keep HANDOFF.md updated as you go.
   - **Still open:** wheel Up/Down browsing does not move the wheel (separate,
     pre-existing). Hint no longer claims it.
   - Release: tag `v1.0.2`.
+
+- **2026-11-08 — v1.0.3: pad "half works" fixed (directions-only keymap).**
+  - **Root cause (FACT):** v1.0.2 bound arrows to directions AND menu buttons.
+    OutFox drops the direction side of a duplicate binding, so menus worked but
+    gameplay arrows did not. (Earlier this same duplication also corrupted the
+    file on exit — the v1.0.0 break.)
+  - **Fix:** keymap is directions-only (P1 arrows, P2 W/A/S/D; menus unbound);
+    removed the `chflags uchg` lock. Verified directions + P2 survive a clean
+    quit.
+  - **2P:** the chooser distinguishes `event.PlayerNumber`; P2 pressing SPACE
+    joins 2 players, P1 ENTER is 1 player. Verified `Players joined: P1, P2` on
+    local and `.54`.
+  - **Difficulty deferred:** cannot coexist with a working direction keymap
+    without duplicates. Next: spare pad buttons (usage 5/6/...) -> MenuLeft/Right.
+  - Synced the stale non-git `.54` checkout.
+  - Tests: `run-tests.sh` 13/13; `test-kids-random.sh` PASS. Release: `v1.0.3`.

@@ -1,5 +1,37 @@
 # Changelog — HomeDDR Kids Station
 
+## v1.0.3 — 2026-11-08
+
+Fixes the **"pad only half works"** regression (menus worked, gameplay arrows did not).
+
+### Fixed
+- **Root cause (FACT):** v1.0.2 bound the pad's arrows to BOTH the gameplay
+  directions and the menu buttons. OutFox does not reliably honour the direction
+  side of a duplicate binding — it drops it — so the pad navigated menus but the
+  four gameplay arrows did not all work. The keymap is now **directions only**
+  again (P1 arrows; P2 W/A/S/D), menu buttons unbound.
+- Removed the `chflags uchg` lock (a hack). The keymap is writable again; with no
+  duplicates there is nothing for OutFox to normalize away. Verified the four
+  directions and P2 bindings survive a clean quit.
+- **2P selection:** the 1P/2P screen now reacts to *which player* pressed Start —
+  P2 pressing SPACE joins 2 players, P1 ENTER starts 1 player. Verified
+  `Players joined: P1, P2` on local and `.54`. (Arrows can't drive this screen
+  because the base screen consumes them before Lua callbacks.)
+- Synced the stale `.54` source checkout (`~/mac-studio-ai-homeserver` there is
+  not a git repo) with this release's files.
+
+### Deferred
+- Per-song difficulty (Left/Right) is off again: it requires binding arrows to
+  the menu buttons too, which is exactly what breaks gameplay arrows. A
+  conflict-free control (e.g., spare pad buttons mapped to MenuLeft/Right) is
+  the next safe design. Songs default to Beginner.
+
+### Tests
+- `scripts/run-tests.sh` — 13 unit tests (keymap has no direction/menu overlap,
+  padbridge emits only arrows+Enter).
+- `scripts/test-kids-random.sh` — random first song end-to-end.
+- (Difficulty test removed while the feature is deferred.)
+
 ## v1.0.2 — 2026-11-08
 
 Brings back per-song difficulty, safely, and restores 2P selection.

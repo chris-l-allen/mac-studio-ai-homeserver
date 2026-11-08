@@ -64,7 +64,7 @@ t[#t+1] = optionButton("TwoPlayers", "2 PLAYERS", SCREEN_CENTER_X + 200)
 
 t[#t+1] = Def.BitmapText{
 	Font = "_Plex Bold Large",
-	Text = "Left/Right: choose players   •   Start: play",
+	Text = "Player 1: START to play   •   Player 2: press SPACE to join",
 	InitCommand = function(self)
 		self:xy(SCREEN_CENTER_X, SCREEN_BOTTOM - 44):zoom(0.42):shadowlength(1):strokecolor(color("#0E2830"))
 	end,
@@ -96,6 +96,14 @@ t[#t+1] = Def.ActorFrame{
 				elseif hit("Up") then
 					selected = 2; refresh(self:GetParent()); return true
 				elseif hit("Start") then
+					-- The pad's arrows are directions only (OutFox drops duplicate
+					-- direction/menu keys), so arrows cannot drive this chooser.
+					-- P2 pressing its own Start (SPACE) means "join 2 players";
+					-- P1 Start (Enter) starts a 1-player game.
+					if event.PlayerNumber == "PlayerNumber_P2" then
+						selected = 2
+						refresh(self:GetParent())
+					end
 					confirm(); return true
 				end
 				return false

@@ -68,7 +68,7 @@ return Def.ActorFrame{
 	},
 	Def.BitmapText{
 		Font="Common Normal";
-		Text="Left/Right: Difficulty   Start: Play";
+		Text="Start: Play";
 		InitCommand=function(self)
 			self:xy(SCREEN_CENTER_X, SCREEN_BOTTOM-28):zoom(0.55):shadowlength(1):strokecolor(color("#163742"))
 		end;
