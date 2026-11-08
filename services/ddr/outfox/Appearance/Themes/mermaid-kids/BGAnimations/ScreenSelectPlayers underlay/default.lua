@@ -65,11 +65,6 @@ t[#t+1] = optionButton("TwoPlayers", "2 PLAYERS", SCREEN_CENTER_X + 200)
 t[#t+1] = Def.ActorFrame{
 	OnCommand = function(self)
 		pcall(function() GAMESTATE:Reset() end)
-		pcall(function()
-			local s = SONGMAN:FindSong("StarrySergal's Flamin Hot Munchies/Crab Rave - [StarrySergal]")
-			Trace("CRAB find="..tostring(s))
-			if s then Trace("CRAB steps="..tostring(#s:GetAllSteps())) end
-		end)
 		selected = 1
 		refresh(self:GetParent())
 		local top = SCREENMAN:GetTopScreen()

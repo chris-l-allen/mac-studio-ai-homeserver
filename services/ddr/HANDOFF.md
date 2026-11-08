@@ -570,9 +570,16 @@ system software or buying anything. Keep HANDOFF.md updated as you go.
      Status: UNVERIFIED. Keymap has P2=W/A/S/D (hex-verified). Root cause unknown;
      prior "engine-level" claim was premature. Next: reproduce with a single test
      and read actual state, not assumptions.
-  3. **Song wheel not reliably randomizing.** Status: UNVERIFIED. A crash from
-     `os.time()` (nil in OutFox Lua) was found and removed; seed now uses
-     `GetTimeSinceStart()` (guarded). Not yet observed working.
+  3. **Song wheel not reliably randomizing.** ADDRESSED (2026-11-08) — see
+     changelog. FACT locally / deployed to `.54`: the pick was random, but
+     `MusicWheel:SelectSong()` only moves the wheel cursor; it never updates
+     GAMESTATE's current song, so Start always played the first song. Fix: set
+     `GAMESTATE:SetPreferredSong(pick)` then `wheel:ChangeSort("SortOrder_Preferred")`
+     so the engine's `SelectSongOrCourse()` commits it. Also added a no-immediate-
+     repeat guard. Local integration test `scripts/test-kids-random.sh` PASSES
+     (picked song is played; 4/5 distinct). `.54` deployed + theme loaded; the
+     owner was scrolling during the restart, so a clean production play-through
+     is still unverified.
   4. **Wavy HUD lines still visible on gameplay.** Status: UNVERIFIED. Disabled
      `SongMeterDisplay`/graphs in several files but the element still shows; the
      actual drawing element has not been identified.
@@ -583,3 +590,51 @@ system software or buying anything. Keep HANDOFF.md updated as you go.
 
   (Owner to continue the ordered list; entries 2-7 are this session's inventory
   pending the owner's ordering.)
+
+- **2026-11-08 — Kids wheel first-song randomization fixed (local verified; `.54`
+  deployed).** Ownership/hypothesis ledger:
+  - FACT: the pick was already random, but `MusicWheel:SelectSong()` only moves the
+    wheel cursor. It returns `true` even when it does not commit, and never updates
+    GAMESTATE's current song, so Start always played the first wheel song (BOP on
+    `.54`, Free locally). Confirmed with source + logs + screenshots: the cursor
+    moved to the pick while `ScreenGameplay` loaded the first song.
+  - FIX: `GAMESTATE:SetPreferredSong(pick)` then `wheel:ChangeSort("SortOrder_Preferred")`;
+    the engine's `SelectSongOrCourse()` then commits the pick. Added a no-immediate-
+    repeat guard so back-to-back visits differ. File:
+    `outfox/Appearance/Themes/mermaid-kids/BGAnimations/ScreenSelectMusic background.lua`.
+  - TEST: `scripts/test-kids-random.sh` (AppleScript-driven integration test; restarts
+    OutFox, asserts the picked song is the one played, and that visits differ).
+    PASS locally (Phase A picked≠initial and that song played; Phase B 4/5 distinct).
+  - DEPLOY: local `~/Applications/OutFox` + `.54` via `tar | ssh` (backup at
+    `~/ddr-theme-backups/` on `.54`; hashes match). `.54` log confirms
+    `Theme: mermaid-kids` and `KIDPOP picked A Dream Is a Wish Your Heart Makes`
+    (non-first). A clean production play-through was not captured because the owner
+    was scrolling during the restart — owner play-test pending.
+
+- **2026-11-08 — v1.0.0 release: difficulty, P2 keyboard, pad safety.** All three
+  requested features implemented with tests and deployed to local + `.54`.
+  - **Difficulty Left/Right (FACT, verified 1P+P2 on local and `.54`):** two gates
+    were off — `_fallback` has `ChangeStepsWithGameButtons=false`, and the keymap
+    bound `MenuLeft/Right` to Delete/PgDn while the pad sends arrows. Fix:
+    `mermaid-kids/metrics.ini` sets `ChangeStepsWithGameButtons=true` +
+    `WrapChangeSteps=true`; `scripts/fix-keymap.py` binds P1 `Menu*` to arrows.
+    Removed the broken `AddInputCallback` in `ScreenSelectMusic overlay.lua`; the
+    label now updates on `ChangeStepsMessageCommand`. Trace showed
+    `DIFF ChangeSteps now=Difficulty_Easy`; screenshot shows `DIFFICULTY: Easy`.
+  - **P2 keyboard (FACT, verified):** `2_Left`/`2_Down` had only keypad bindings;
+    `Key_a`/`Key_s` were on `2_MenuLeft`/`2_MenuDown`. Canonical keymap now binds
+    P2 W/A/S/D to both direction and menu buttons. `test-kids-difficulty.sh` proves
+    P2 A/D reach the engine (`ChangeSteps( 1, ±1 )`). W/S gameplay play-test still
+    recommended.
+  - **Pad safety (FACT, verified running binary):** `padbridge.c` already maps usage
+    9 and all unlabelled buttons to inert; recent `.54` log shows `usage=9 key=0`
+    (old `key=53` Escape entries are historical). Added unit test
+    `tests/test_padbridge_map.py` asserting only arrows+Enter are emitted.
+  - **Tests:** `scripts/run-tests.sh` (9 unit tests) PASS; `test-kids-random.sh`
+    PASS (restart-per-visit for determinism); `test-kids-difficulty.sh` PASS on
+    local and `.54`.
+  - **Keymap deploy:** applied on `.54` while OutFox was closed (backups
+    `Keymaps.ini.bak-fixkeymap-*`). `.54` restarted with `Theme: mermaid-kids`.
+  - **Known issue:** wheel Up/Down browsing still does not move the wheel
+    (pre-existing, out of scope). Random pick + difficulty + play work.
+  - Release: `services/ddr/CHANGELOG.md`, tag `v1.0.0`.

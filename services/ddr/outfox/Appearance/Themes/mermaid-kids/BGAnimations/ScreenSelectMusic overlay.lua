@@ -32,58 +32,12 @@ local function forceEasiest()
 	end)
 end
 
-local DIFF_ORDER = {"Difficulty_Beginner","Difficulty_Easy","Difficulty_Medium","Difficulty_Hard","Difficulty_Challenge"}
-local function difficultySteps(song, st)
-	local m = {}
-	for _, s in ipairs(song:GetAllSteps()) do
-		if s:GetStepsType() == st then
-			local d = s:GetDifficulty()
-			for i, name in ipairs(DIFF_ORDER) do
-				if d == name then m[i] = s end
-			end
-		end
-	end
-	return m
-end
-
-local function cycleDifficulty(dir)
-	local song = GAMESTATE:GetCurrentSong()
-	if not song then return end
-	local st = GAMESTATE:GetCurrentStyle():GetStepsType()
-	local avail = difficultySteps(song, st)
-	local cur = GAMESTATE:GetCurrentSteps(PLAYER_1)
-	local curRank = 1
-	if cur then
-		local d = cur:GetDifficulty()
-		for i, name in ipairs(DIFF_ORDER) do if d == name then curRank = i end end
-	end
-	local r = curRank + dir
-	while r >= 1 and r <= #DIFF_ORDER do
-		if avail[r] then
-			for _, pn in ipairs(GAMESTATE:GetEnabledPlayers()) do
-				GAMESTATE:SetCurrentSteps(pn, avail[r])
-			end
-			return
-		end
-		r = r + dir
-	end
-end
-
 return Def.ActorFrame{
-	OnCommand=function(self)
-		forceEasiest()
-		local top = SCREENMAN:GetTopScreen()
-		if top then
-			top:AddInputCallback(function(event)
-				if event.type ~= "InputEventType_FirstPress" then return false end
-				local b = event.GameButton
-				if b == "MenuLeft" or b == "Left" then cycleDifficulty(-1); return true
-				elseif b == "MenuRight" or b == "Right" then cycleDifficulty(1); return true
-				end
-				return false
-			end)
-		end
-	end;
+	-- Difficulty is handled by the engine: metrics enable
+	-- ChangeStepsWithGameButtons, and the keymap maps MenuLeft/MenuRight to the
+	-- pad's Left/Right arrows. A custom AddInputCallback here used to consume
+	-- Left/Right and silently fail, so it was removed.
+	OnCommand=function(self) forceEasiest() end;
 	SongChangedMessageCommand=function(self) forceEasiest() end;
 	MouseWheelUpMessageCommand=function(self)
 		local scr = SCREENMAN:GetTopScreen()
@@ -107,6 +61,9 @@ return Def.ActorFrame{
 		end;
 		OnCommand=function(self) self:settext(difficultyLabel()) end;
 		CurrentStepsChangedMessageCommand=function(self) self:settext(difficultyLabel()) end;
+		-- The engine broadcasts "ChangeSteps" when Left/Right cycles difficulty;
+		-- CurrentStepsChanged is not emitted for this path, so listen to both.
+		ChangeStepsMessageCommand=function(self) self:settext(difficultyLabel()) end;
 	},
 	Def.BitmapText{
 		Font="Common Normal";

@@ -2,41 +2,58 @@ setenv("musicWheelItemColor", color("#1E3A4A"))
 setenv("sectionWheelItemColorA", color("#9EEAEA"))
 setenv("sectionWheelItemColorB", color("#F400F4"))
 
+-- Choose a random song from the kid pool when the wheel opens.
+--
+-- IMPORTANT: MusicWheel:SelectSong() only moves the wheel's cursor; it does
+-- NOT update GAMESTATE's current song, so Start would still play whatever was
+-- selected before (always the first song). Instead we set the preferred song
+-- and then re-apply the preferred sort: the engine's own SelectSongOrCourse()
+-- path then commits it as the current song. Verified locally: the log shows
+-- the picked song's folder loading for gameplay.
 local function applyKidsWheel()
 	local screen = SCREENMAN:GetTopScreen()
 	if not screen then return end
 	SONGMAN:SetPreferredSongs("Kids Pop")
 	local wheel = screen:GetMusicWheel()
-	if wheel then
-		wheel:ChangeSort("SortOrder_Preferred")
-		local rate = tonumber(THEME:GetMetric("KidsDDR", "MusicRate")) or 1.0
-		local opts = GAMESTATE:GetSongOptionsObject("ModsLevel_Preferred")
-		if opts then opts:MusicRate(rate) end
-		local groups = {"K-Pop Demon Hunters", "Kids Easy"}
-		local pool = {}
-		for _, g in ipairs(groups) do
-			local ok, songs = pcall(function() return SONGMAN:GetSongsInGroup(g) end)
-			if ok and songs then
-				for _, s in ipairs(songs) do
-					if s:GetMainTitle() ~= "nothing to see here" then
-						pool[#pool+1] = s
-					end
+	if not wheel then return end
+
+	local rate = tonumber(THEME:GetMetric("KidsDDR", "MusicRate")) or 1.0
+	local opts = GAMESTATE:GetSongOptionsObject("ModsLevel_Preferred")
+	if opts then opts:MusicRate(rate) end
+
+	local groups = {"K-Pop Demon Hunters", "Kids Easy"}
+	local pool = {}
+	for _, g in ipairs(groups) do
+		local ok, songs = pcall(function() return SONGMAN:GetSongsInGroup(g) end)
+		if ok and songs then
+			for _, s in ipairs(songs) do
+				if s:GetMainTitle() ~= "nothing to see here" then
+					pool[#pool+1] = s
 				end
 			end
 		end
-		if #pool > 0 then
-			KidPopRoll = (KidPopRoll or 0) + 1
-			local t = 0
-			pcall(function() t = math.floor(GetTimeSinceStart() * 1000) end)
-			math.randomseed(t + KidPopRoll)
-			wheel:SelectSong(pool[math.random(#pool)])
-		end
 	end
-	pcall(function()
-		local s = SONGMAN:FindSong("StarrySergal's Flamin Hot Munchies/Crab Rave - [StarrySergal]")
-		Trace("CRAB find="..tostring(s))
-		if s then Trace("CRAB steps="..tostring(#s:GetAllSteps())) end
-	end)
+
+	if #pool > 0 then
+		KidPopRoll = (KidPopRoll or 0) + 1
+		local t = 0
+		pcall(function() t = math.floor(GetTimeSinceStart() * 1000) end)
+		math.randomseed(t + KidPopRoll)
+		local idx = math.random(#pool)
+		-- Avoid replaying the same song on back-to-back visits; that reads as
+		-- "not random" to a child even when the RNG is fine.
+		local guard = 0
+		while #pool > 1 and pool[idx] == KidPopLast and guard < 16 do
+			idx = math.random(#pool)
+			guard = guard + 1
+		end
+		local pick = pool[idx]
+		KidPopLast = pick
+		GAMESTATE:SetPreferredSong(pick)
+		Trace("KIDPOP picked "..tostring(pick:GetMainTitle()))
+	end
+
+	wheel:ChangeSort("SortOrder_Preferred")
 end
 
 local function applyPartyOptions()
@@ -78,7 +95,7 @@ return Def.ActorFrame{
 		end;
 	},
 	Def.ActorFrame{
-		OnCommand=function(self) self:sleep(0.1):queuecommand("Apply") end;
+		OnCommand=function(self) self:sleep(1.5):queuecommand("Apply") end;
 		ApplyCommand=function()
 			applyKidsWheel()
 			applyPartyOptions()
