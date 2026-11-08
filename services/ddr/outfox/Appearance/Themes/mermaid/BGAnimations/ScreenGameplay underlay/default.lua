@@ -357,15 +357,22 @@ if not GAMESTATE:IsDemonstration() then
 end
 
 -- fail when the life bar empties (drain is in [LifeMeterBar]; ~30 misses)
+local playerLives = {}
 t[#t+1] = Def.Actor{
 	LifeChangedMessageCommand=function(self, params)
-		if params.Player ~= PLAYER_1 or self.failed then return end
-		if params.LifeMeter and params.LifeMeter:GetLife() <= 0.01 then
+		if params.Player and params.LifeMeter then
+			playerLives[params.Player] = params.LifeMeter:GetLife()
+		end
+		if self.failed then return end
+		local enabled = GAMESTATE:GetEnabledPlayers()
+		local allOut = (#enabled > 0)
+		for _, pn in ipairs(enabled) do
+			local v = playerLives[pn]
+			if v == nil or v > 0.01 then allOut = false end
+		end
+		if allOut then
 			self.failed = true
-			local stats = STATSMAN:GetCurStageStats()
-			local ps = stats and stats:GetPlayerStageStats(PLAYER_1)
-			local misses = ps and ps:GetTapNoteScores("TapNoteScore_Miss") or -1
-			Trace("mermaid life empty -> fail, misses="..tostring(misses))
+			Trace("mermaid all players out -> fail")
 			SCREENMAN:SetNewScreen("ScreenGameOver")
 		end
 	end,

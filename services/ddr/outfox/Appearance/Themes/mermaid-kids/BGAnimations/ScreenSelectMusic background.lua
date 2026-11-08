@@ -31,9 +31,10 @@ local function applyKidsWheel()
 end
 
 local function applyPartyOptions()
-	local pn = PLAYER_1
 	pcall(function()
-		GAMESTATE:GetPlayerState(pn):GetPlayerOptions("ModsLevel_Preferred"):FailSetting("FailType_Immediate")
+		for _, pn in ipairs(GAMESTATE:GetEnabledPlayers()) do
+			GAMESTATE:GetPlayerState(pn):GetPlayerOptions("ModsLevel_Preferred"):FailSetting("FailType_ImmediateContinue")
+		end
 	end)
 end
 

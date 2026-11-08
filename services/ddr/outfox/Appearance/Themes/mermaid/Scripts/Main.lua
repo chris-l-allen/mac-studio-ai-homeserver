@@ -182,15 +182,16 @@ end
 
 Branch.AfterGameplay = function()
 	local stats = STATSMAN:GetCurStageStats()
-	if stats and stats:AllFailed() then return "ScreenGameOver" end
-	-- gave up early -> home (quit); reached the end -> WINNER screen
-	local pn = GAMESTATE:GetMasterPlayerNumber()
-	local ps = stats and stats:GetPlayerStageStats(pn)
 	local song = GAMESTATE:GetCurrentSong()
-	if ps and song and ps:GetAliveSeconds() < (song:GetLastSecond() - 1) then
-		return "ScreenTitleMenuHome"
+	if stats and song then
+		for _, pn in ipairs(GAMESTATE:GetEnabledPlayers()) do
+			local ps = stats:GetPlayerStageStats(pn)
+			if ps and ps:GetAliveSeconds() >= (song:GetLastSecond() - 1) then
+				return "ScreenWin"
+			end
+		end
 	end
-	return "ScreenWin"
+	return "ScreenGameOver"
 end
 
 Branch.AfterProfileLoad = function()
