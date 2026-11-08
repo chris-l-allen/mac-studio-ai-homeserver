@@ -443,3 +443,40 @@ system software or buying anything. Keep HANDOFF.md updated as you go.
   (`LifeMeter:GetLife() <= 0.01` → `SCREENMAN:SetNewScreen("ScreenGameOver")`)
   routes to the fail video. Verified trace: `mermaid life empty -> fail,
   misses=30` → `ScreenGameOver`.
+- **2026-11-07** — Hi-res art upgrade for existing tracks (official covers from
+  the internet, no AI generation). Sourced 40 covers via the iTunes/Apple Music
+  catalog (1400–3000 px) into `services/ddr/media/<slug>/`; staged clean
+  scale_crop art (banner 1024×400, bg 1920×1080, jacket 1024, cd 612×400) and
+  replaced the low-res art **in place, using each song's referenced filenames**,
+  for the 15 tracks already in the library: Baby Shark, The Fox, Dumb Ways to
+  Die, Chandelier, Gangnam Style, Uptown Funk!, Call Me Maybe, Can't Stop The
+  Feeling, Shake It Off, Roar, Good Time, Let It Go, Shut Up and Dance, Counting
+  Stars, Cheerleader. Baby Shark / The Fox `.sm` refs set explicitly and a
+  `Baby Shark-bg.png` symlink added under `Kids Easy`.
+  Repo `songpacks/` on `.54` is the master; `Songs/<pack>` is a **symlink** to
+  it (all packs except `Outfox`). **CRITICAL LESSON: never use
+  `rsync --backup-dir` here — macOS `rsync` is openrsync and it deleted the
+  real-dir `Songs/` copies (Stepmania 54→12, all ogg).** Recovered because the
+  repo was intact: re-pointed Hannah's / Highflyer's / Stepmania `Songs/` entries
+  as symlinks to the repo. Ship files with `tar | ssh` (also safe for spaces and
+  `()` in names), not rsync. Art backups: `~/ddr-art-backups/` on `.54`.
+- **2026-11-07** — Kid wheel now surfaces the upgraded tracks. Added a curated
+  `Other/SongManager Kids Pop.txt` category (the 15 tracks + `K-Pop Demon
+  Hunters/*`) and set `SetPreferredSongs("Kids Pop")` in
+  `mermaid-kids/BGAnimations/ScreenSelectMusic background.lua` (random pick pool =
+  K-Pop + Kids Easy). Also added hi-res `#JACKET` (1024²) to the 7 of 15 that
+  lacked one (Baby Shark, The Fox, Gangnam Style, Call Me Maybe, Shake It Off,
+  Shut Up and Dance, Counting Stars). Verified via ThemeLua log:
+  `KIDSPOP wheel items=15` and K-Pop banners still load. NOTE:
+  `~/Library/Logs/Project OutFox/` (`ProjectOutfox.Crash.*`) is written every
+  run — tiny/0-byte entries are sink placeholders, not real crashes.
+- **2026-11-07** — Fixed the "Kids Pop" wheel (15 didn't show; only K-Pop did).
+  Cause (verified in StepMania `SongManager::UpdatePreferredSort` + `Song::Matches`):
+  in `Other/SongManager <name>.txt`, a line ending in `/*` adds a whole **group**,
+  but any other line goes to `FindSong(line)` → splits `Group/Song` and matches
+  the **song folder name** case-insensitively (NOT a glob). My earlier
+  `Group/Song*` lines therefore matched nothing; only `K-Pop Demon Hunters/*`
+  worked. Fix: list exact `Group/FolderName` lines with **no `*`** (e.g.
+  `Stepmania Pop Hits Collection/Shake it off 2`), keep the group line as
+  `K-Pop Demon Hunters/*`. `SetPreferredSongs("Kids Pop")` loads
+  `{theme}/Other/SongManager Kids Pop.txt`.
