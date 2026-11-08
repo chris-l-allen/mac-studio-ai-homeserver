@@ -1,6 +1,6 @@
 return Def.ActorFrame {
 	InitCommand = function(self) self:xy(SCREEN_CENTER_X, SCREEN_CENTER_Y) end,
-	OnCommand = function(self) self:sleep(7):queuecommand("Advance") end,
+	OnCommand = function(self) self:sleep(5.6):queuecommand("Advance") end,
 	AdvanceCommand = function(self)
 		SCREENMAN:SetNewScreen("ScreenTitleMenuHome")
 	end,
@@ -17,7 +17,6 @@ return Def.ActorFrame {
 		InitCommand = function(self)
 			if not self then return end
 			self:center():setsize(SCREEN_HEIGHT * 720 / 1280, SCREEN_HEIGHT);
-			self:loop(true);
 		end,
 	},
 
