@@ -378,4 +378,24 @@ t[#t+1] = Def.Actor{
 	end,
 }
 
+-- per-player OUT indicator (shown when a player's life bar empties)
+for _, pn in ipairs(GAMESTATE:GetEnabledPlayers()) do
+	local pNum = (pn == PLAYER_1) and 1 or 2
+	local x = SCREEN_CENTER_X
+	if GAMESTATE:GetNumPlayersEnabled() > 1 then
+		x = THEME:GetMetric("ScreenGameplay", "PlayerP"..pNum.."TwoPlayersTwoSidesX")
+	end
+	t[#t+1] = Def.ActorFrame{
+		InitCommand=function(self) self:xy(x, SCREEN_CENTER_Y):visible(false) end,
+		LifeChangedMessageCommand=function(self, params)
+			if params.Player ~= pn then return end
+			if params.LifeMeter and params.LifeMeter:GetLife() <= 0.01 then
+				self:visible(true)
+				Trace("mermaid player out: "..ToEnumShortString(pn))
+			end
+		end,
+		Def.BitmapText{ Font="_Plex Bold Large"; Text="OUT"; InitCommand=function(self) self:zoom(1.6):diffuse(color("1,0.25,0.25,0.95")):shadowlength(3) end },
+	}
+end
+
 return t
