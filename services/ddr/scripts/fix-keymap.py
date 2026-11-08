@@ -1,83 +1,83 @@
 #!/usr/bin/env python3
-"""Write a known-good OutFox keymap for the kids DDR station.
+"""Write the known-good OutFox keymap for the kids DDR station.
 
-The theme's song wheel uses the engine's *menu* buttons:
-  PreviousSongButton/NextSongButton       = MenuUp / MenuDown
-  PreviousDifficultyButton/NextDifficulty = MenuLeft / MenuRight
-The pad sends plain arrow keys, so the menu buttons must be bound to the same
-arrows or the pad cannot move the wheel or change difficulty.
+Design constraint (verified): OutFox rewrites Keymaps.ini on exit and, when a
+key is bound to BOTH a gameplay direction and the matching menu button, it
+clears the direction side. That killed the pad's Down/Left in v1.0.0.
 
-P2 is a normal keyboard: W/A/S/D must be bound to the *direction* buttons
-(gameplay) AND the menu buttons (wheel/difficulty), otherwise only Up/Right
-register (the original W/A/S/D bug).
+But the pad's arrows must drive gameplay directions *and* the song wheel /
+difficulty menus at the same time. The way to keep both is to make the file
+immutable (`chflags uchg`) after writing it: OutFox's exit-time rename then
+fails (it only logs a warning) and the duplicate bindings survive, so the next
+launch still has working directions AND menu navigation.
 
-OutFox rewrites Keymaps.ini on exit, so this must run while OutFox is closed.
+Run while OutFox is closed (a running instance holds the old maps in memory).
 
 Usage:
-    python3 fix-keymap.py [--check] [--file PATH] [--force]
+    python3 fix-keymap.py [--check] [--file PATH] [--no-lock]
 
---check only validates; exit status 1 if the file does not meet the contract.
+--check validates the content and that the file is locked (immutable).
+--no-lock writes/validates without the immutable flag (used by unit tests).
 """
 
 from __future__ import annotations
 
 import argparse
-import os
 import shutil
+import stat
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 SECTION = "dance"
 
-# action -> device-input value (":" separated bindings)
-CANONICAL: dict[str, str] = {
-    # P1: pad arrows are the gameplay directions only.
-    #
-    # Do NOT also bind MenuUp/Down/Left/Right to the same arrows: OutFox resolves
-    # a key bound to two game buttons by clearing one of them when it rewrites
-    # Keymaps.ini on exit, which killed the pad's Down/Left after a restart.
-    # Difficulty is handled by a Lua input callback on the direction buttons
-    # (see ScreenSelectMusic overlay.lua), so the menu buttons can stay unbound.
-    "1_Up": "Key_up",
-    "1_Down": "Key_down",
-    "1_Left": "Key_left",
-    "1_Right": "Key_right",
-    "1_MenuUp": "",
-    "1_MenuDown": "",
-    "1_MenuLeft": "",
-    "1_MenuRight": "",
-    "1_Start": "Key_enter",
-    "1_Back": "Key_escape",
-    "1_Select": "Key_/",
-    "1_Coin": "Key_F1",
-    "1_Operator": "Key_scroll lock",
-    "1_EffectUp": "",
-    "1_EffectDown": "",
-    "1_UpLeft": "",
-    "1_UpRight": "",
-    # P2: W/A/S/D directions only (no menu duplicates).
-    "2_Up": "Key_w",
-    "2_Down": "Key_s",
-    "2_Left": "Key_a",
-    "2_Right": "Key_d",
-    "2_MenuUp": "",
-    "2_MenuDown": "",
-    "2_MenuLeft": "",
-    "2_MenuRight": "",
-    "2_Start": "Key_space",
-    "2_Back": "Key_escape",
-    "2_Select": "",
-    "2_Coin": "",
-    "2_Operator": "",
-    "2_EffectUp": "",
-    "2_EffectDown": "",
-    "2_UpLeft": "",
-    "2_UpRight": "",
+# The pad sends arrow keys for P1 and W/A/S/D for P2. Both the direction and the
+# menu button are bound to the same key so the wheel/difficulty work; the file
+# must then be locked (see module docstring).
+ARROWS = {
+    "Up": "Key_up",
+    "Down": "Key_down",
+    "Left": "Key_left",
+    "Right": "Key_right",
+}
+P2_KEYS = {
+    "Up": "Key_w",
+    "Down": "Key_s",
+    "Left": "Key_a",
+    "Right": "Key_d",
 }
 
-# Keys that must never be bound to a direction/menu button: they can leave the
-# game, change windows, or trigger system UI on macOS.
+CANONICAL: dict[str, str] = {}
+for d in ("Up", "Down", "Left", "Right"):
+    CANONICAL[f"1_{d}"] = ARROWS[d]
+    CANONICAL[f"1_Menu{d}"] = ARROWS[d]
+    CANONICAL[f"2_{d}"] = P2_KEYS[d]
+    CANONICAL[f"2_Menu{d}"] = P2_KEYS[d]
+CANONICAL.update(
+    {
+        "1_Start": "Key_enter",
+        "1_Back": "Key_escape",
+        "1_Select": "Key_/",
+        "1_Coin": "Key_F1",
+        "1_Operator": "Key_scroll lock",
+        "1_EffectUp": "",
+        "1_EffectDown": "",
+        "1_UpLeft": "",
+        "1_UpRight": "",
+        "2_Start": "Key_space",
+        "2_Back": "Key_escape",
+        "2_Select": "",
+        "2_Coin": "",
+        "2_Operator": "",
+        "2_EffectUp": "",
+        "2_EffectDown": "",
+        "2_UpLeft": "",
+        "2_UpRight": "",
+    }
+)
+
+# Keys that must never be bound to a direction/menu button.
 FORBIDDEN_IN_DIRECTIONS = {
     "Key_escape",
     "Key_tab",
@@ -94,13 +94,11 @@ FORBIDDEN_IN_DIRECTIONS = {
     "Key_F5",
 }
 
-DIRECTION_ONLY = {
-    f"{p}_{d}" for p in ("1", "2") for d in ("Up", "Down", "Left", "Right")
+DIRECTION_ACTIONS = {
+    f"{p}_{d}"
+    for p in ("1", "2")
+    for d in ("Up", "Down", "Left", "Right", "MenuUp", "MenuDown", "MenuLeft", "MenuRight")
 }
-MENU_ONLY = {
-    f"{p}_Menu{d}" for p in ("1", "2") for d in ("Up", "Down", "Left", "Right")
-}
-DIRECTION_ACTIONS = DIRECTION_ONLY | MENU_ONLY
 
 
 def default_path() -> Path:
@@ -108,7 +106,6 @@ def default_path() -> Path:
 
 
 def parse(text: str) -> tuple[list[str], dict[str, str], list[str]]:
-    """Return (prefix lines before [dance], dance entries, trailing lines)."""
     lines = text.splitlines()
     start = None
     for i, line in enumerate(lines):
@@ -117,7 +114,6 @@ def parse(text: str) -> tuple[list[str], dict[str, str], list[str]]:
             break
     if start is None:
         return lines, {}, []
-
     entries: dict[str, str] = {}
     end = len(lines)
     for j in range(start + 1, len(lines)):
@@ -142,6 +138,34 @@ def render(prefix: list[str], entries: dict[str, str], trailer: list[str]) -> st
     return "\n".join(out).rstrip("\n") + "\n"
 
 
+def is_locked(path: Path) -> bool:
+    try:
+        return bool(os_stat_flags(path) & stat.UF_IMMUTABLE)
+    except Exception:
+        return False
+
+
+def os_stat_flags(path: Path) -> int:
+    return getattr(path.stat(), "st_flags", 0)
+
+
+def set_locked(path: Path, locked: bool) -> None:
+    flag = "uchg" if locked else "nouchg"
+    subprocess.run(["chflags", flag, str(path)], check=True)
+
+
+def overlaps(entries: dict[str, str]) -> list[str]:
+    def keys(actions):
+        out = set()
+        for a in actions:
+            out.update(filter(None, (entries.get(a) or "").split("::::")))
+        return out
+
+    directions = {f"{p}_{d}" for p in ("1", "2") for d in ("Up", "Down", "Left", "Right")}
+    menus = {f"{p}_Menu{d}" for p in ("1", "2") for d in ("Up", "Down", "Left", "Right")}
+    return sorted(keys(directions) & keys(menus))
+
+
 def problems(entries: dict[str, str]) -> list[str]:
     out = []
     for action, want in CANONICAL.items():
@@ -149,41 +173,19 @@ def problems(entries: dict[str, str]) -> list[str]:
         if got != want:
             out.append(f"{action}: expected {want!r}, got {got!r}")
     for action in sorted(DIRECTION_ACTIONS):
-        val = entries.get(action) or ""
-        for binding in filter(None, val.split("::::")):
+        for binding in filter(None, (entries.get(action) or "").split("::::")):
             if binding in FORBIDDEN_IN_DIRECTIONS:
                 out.append(f"{action}: forbidden key {binding!r}")
-
-    # A key bound to both a gameplay direction and the matching menu button is
-    # not stable: OutFox clears one side when it rewrites Keymaps.ini on exit.
-    def keys(actions):
-        out_keys = set()
-        for action in actions:
-            out_keys.update(filter(None, (entries.get(action) or "").split("::::")))
-        return out_keys
-
-    for key in sorted(keys(DIRECTION_ONLY) & keys(MENU_ONLY)):
-        out.append(
-            f"key {key!r} is bound to both a direction and a menu button "
-            "(OutFox clears one on exit)"
-        )
     return out
-
-
-def outfox_running() -> bool:
-    try:
-        return subprocess.run(
-            ["pgrep", "-x", "OutFox"], capture_output=True, timeout=5
-        ).returncode == 0
-    except Exception:
-        return False
 
 
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--check", action="store_true", help="validate only")
     ap.add_argument("--file", type=Path, default=default_path())
-    ap.add_argument("--force", action="store_true", help="apply even if OutFox runs")
+    ap.add_argument(
+        "--no-lock", action="store_true", help="do not set/require the immutable flag"
+    )
     args = ap.parse_args(argv)
 
     if not args.file.exists():
@@ -191,9 +193,11 @@ def main(argv: list[str]) -> int:
         return 2
 
     prefix, entries, trailer = parse(args.file.read_text())
-    if not prefix or not prefix[-1].strip().lower().startswith("[dance]"):
+    if not prefix or prefix[-1].strip().lower() != f"[{SECTION}]":
         print("error: no [dance] section", file=sys.stderr)
         return 2
+
+    overlap = overlaps(entries)
 
     if args.check:
         probs = problems(entries)
@@ -202,27 +206,35 @@ def main(argv: list[str]) -> int:
             for p in probs:
                 print(f"  {p}")
             return 1
-        print("keymap OK")
+        if overlap and not args.no_lock and not is_locked(args.file):
+            print(
+                "keymap FAILED:\n"
+                f"  direction/menu share keys {overlap} but the file is not locked;\n"
+                "  OutFox will clear one side on exit (run without --check to fix)"
+            )
+            return 1
+        print("keymap OK" + (" (locked)" if is_locked(args.file) else ""))
         return 0
 
-    if outfox_running() and not args.force:
-        print(
-            "OutFox is running; quit it first (it rewrites Keymaps.ini on exit).",
-            file=sys.stderr,
-        )
-        return 1
+    if is_locked(args.file):
+        set_locked(args.file, False)
 
     merged = dict(entries)
     merged.update(CANONICAL)
     merged.setdefault("1_", "")
     merged.setdefault("2_", "")
+    merged_overlap = overlaps(merged)
 
     backup = args.file.with_name(
-        args.file.name + ".bak-fixkeymap-" + __import__("time").strftime("%Y%m%d-%H%M%S")
+        args.file.name + ".bak-fixkeymap-" + time.strftime("%Y%m%d-%H%M%S")
     )
     shutil.copy2(args.file, backup)
     args.file.write_text(render(prefix, merged, trailer))
     print(f"wrote {args.file} (backup {backup.name})")
+
+    if merged_overlap and not args.no_lock:
+        set_locked(args.file, True)
+        print("locked keymap (chflags uchg) so OutFox cannot clear duplicate bindings")
 
     remaining = problems(merged)
     if remaining:
@@ -230,7 +242,7 @@ def main(argv: list[str]) -> int:
         for p in remaining:
             print(f"  {p}")
         return 1
-    print("keymap OK")
+    print("keymap OK" + (" (locked)" if is_locked(args.file) else ""))
     return 0
 
 

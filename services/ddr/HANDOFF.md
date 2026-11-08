@@ -657,3 +657,25 @@ system software or buying anything. Keep HANDOFF.md updated as you go.
   - Deployed the minimal keymap + theme (metrics/overlay/chooser) to `.54`; game
     running with `Theme: mermaid-kids`. Removed the failing difficulty test.
   - Release: tag `v1.0.1`; v1.0.0 marked superseded.
+
+- **2026-11-08 — v1.0.2: per-song difficulty restored safely (1P+2P).**
+  - **Mechanism (FACT, verified):** difficulty needs the pad's arrows bound to
+    BOTH the gameplay directions and `MenuLeft/Right`, but OutFox clears one side
+    of a duplicate binding when it rewrites `Keymaps.ini` on exit. Making the
+    keymap file immutable (`chflags uchg`) makes that rewrite fail — OutFox logs
+    `RageFileObjDirect Cleanup Failed!` and continues — so the duplicates survive
+    a clean Cmd+Q and the next launch still has working directions + difficulty.
+  - `scripts/fix-keymap.py` now writes the duplicate canonical map, unlocks
+    before editing if needed, and locks afterwards (`--check` requires the lock
+    when duplicates exist). To hand-edit, `chflags nouchg` first.
+  - `mermaid-kids/metrics.ini` re-enables `ChangeStepsWithGameButtons=true` +
+    `WrapChangeSteps=true`. The 1P/2P chooser responds to Left/Right again, so
+    P2 is selectable normally.
+  - **Tests:** `test-kids-difficulty.sh` PASS on local and `.54` (1P
+    `ChangeSteps(0, ±1)`, 2P `ChangeSteps(1, ±1)` after joining 2P);
+    `run-tests.sh` 13/13; `test-kids-random.sh` PASS.
+  - Deployed to local + `.54`; keymap locked on both; game running
+    (`Theme: mermaid-kids`).
+  - **Still open:** wheel Up/Down browsing does not move the wheel (separate,
+    pre-existing). Hint no longer claims it.
+  - Release: tag `v1.0.2`.

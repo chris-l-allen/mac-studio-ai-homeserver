@@ -1,5 +1,31 @@
 # Changelog — HomeDDR Kids Station
 
+## v1.0.2 — 2026-11-08
+
+Brings back per-song difficulty, safely, and restores 2P selection.
+
+### Added
+- **Per-song difficulty** with Left/Right again: Beginner → Easy → Medium →
+  Hard → Challenge (wraps). Works for **1P and 2P**; the on-screen label updates.
+  Verified end-to-end (`ChangeSteps(0, ±1)` and `ChangeSteps(1, ±1)`).
+- `scripts/test-kids-difficulty.sh` — integration test for 1P and 2P difficulty.
+
+### Fixed / how
+- The pad's arrows must be both gameplay directions and `MenuLeft/Right` for
+  difficulty, but OutFox clears one side of a duplicate binding when it rewrites
+  `Keymaps.ini` on exit (what broke the pad in v1.0.0). The keymap is now made
+  **immutable** (`chflags uchg`) after writing, so OutFox's exit-time rename
+  fails (it only logs a warning) and the duplicate bindings survive. Verified
+  across a clean Cmd+Q and relaunch.
+- The 1P/2P chooser responds to Left/Right again (`MenuLeft/Right` are bound
+  under the locked keymap), so 2P is selectable.
+
+### Changed
+- The on-screen hint no longer claims Up/Down song browsing (wheel Up/Down
+  still does not move the wheel; tracked separately).
+- To edit the keymap, use `scripts/fix-keymap.py` (it unlocks, writes, relocks)
+  or run `chflags nouchg` first.
+
 ## v1.0.1 — 2026-11-08
 
 Fixes a **pad regression introduced in v1.0.0**. v1.0.0 is superseded — do not

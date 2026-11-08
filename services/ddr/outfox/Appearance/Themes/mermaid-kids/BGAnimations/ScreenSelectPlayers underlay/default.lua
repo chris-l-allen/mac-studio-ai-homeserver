@@ -62,12 +62,9 @@ local t = Def.ActorFrame{
 t[#t+1] = optionButton("OnePlayer", "1 PLAYER", SCREEN_CENTER_X - 200)
 t[#t+1] = optionButton("TwoPlayers", "2 PLAYERS", SCREEN_CENTER_X + 200)
 
--- The pad's arrows are gameplay directions (binding them to the menu too makes
--- OutFox clear the direction on exit). So the chooser defaults to 1P; player 2
--- joins with the SPACE key on the next screen.
 t[#t+1] = Def.BitmapText{
 	Font = "_Plex Bold Large",
-	Text = "Press START to play  •  Player 2: press SPACE on the song screen",
+	Text = "Left/Right: choose players   •   Start: play",
 	InitCommand = function(self)
 		self:xy(SCREEN_CENTER_X, SCREEN_BOTTOM - 44):zoom(0.42):shadowlength(1):strokecolor(color("#0E2830"))
 	end,
