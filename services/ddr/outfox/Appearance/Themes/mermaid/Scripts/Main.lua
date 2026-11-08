@@ -182,14 +182,8 @@ end
 
 Branch.AfterGameplay = function()
 	local stats = STATSMAN:GetCurStageStats()
+	-- only a genuine life-loss is a fail; reaching the end (or quitting) wins/goes home
 	if stats and stats:AllFailed() then return "ScreenGameOver" end
-	-- gave up / didn't finish (alive < song length) -> fail video -> home
-	local pn = GAMESTATE:GetMasterPlayerNumber()
-	local ps = stats and stats:GetPlayerStageStats(pn)
-	local song = GAMESTATE:GetCurrentSong()
-	if ps and song and ps:GetAliveSeconds() < (song:MusicLengthSeconds() - 1) then
-		return "ScreenGameOver"
-	end
 	return "ScreenTitleMenuHome"
 end
 
