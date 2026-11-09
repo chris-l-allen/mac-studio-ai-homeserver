@@ -3,9 +3,133 @@
 > Read this file first in any new session. It is the single source of truth for
 > project state, decisions, and the next actions. Keep it current as work lands.
 
-**Updated:** 2026-11-07
+**Updated:** 2026-11-08
 **Owner:** callen
-**Repo:** `/Users/callen/home-ddr` (local git; remote optional)
+**Repo:** `/Users/callen/mac-studio-ai-homeserver`
+
+---
+
+## 0. Latest (2026-11-08)
+
+- **Library is one flat pack, curated to 66 songs** (`songpacks/Library`). The 37
+  `Kids Easy` duplicates were dropped earlier; 72 songs sit in `_trash/Library`
+  (reversible). Mission focus moved off kid-specific tuning.
+- **Serenity pack added** (`songpacks/Serenity`, 27 dance songs from OutFox
+  Serenity All-In-One v2.5; 9 guitar-only variants skipped).
+  `/Applications/OutFox/Songs` links **Library + Serenity**; OutFox verified
+  `Found 93 songs`.
+- **Curation UI (multi-pack):** <https://ddr.allen/library>. Pick a pack tab
+  (Library / Serenity), filter, delete to `songpacks/_trash/<pack>` (reversible),
+  restore, and "Apply changes" (restart OutFox + rebuild cache). Deletes require
+  the admin key in `~/.config/homeddr/admin.token` (never commit it).
+- **Pack catalogue:** `services/ddr/pack-catalog.json` — 10,075 packs from the
+  StepMania Online API (9,743 with dance charts).
+- **Path fix:** `homeserver/server.py:46` now resolves OutFox via
+  `Path.home() / "Applications/OutFox/Songs"` (was hardcoded `/Applications/OutFox/Songs`
+  which missed the actual location). Verified `active_packs()` returns both packs.
+- **Ultimate Hits Revolution** (239 songs, StepMania Online #4073) was downloaded,
+  linked, and purged (2026-11-08) — owner found it a "complete miss" for the
+  40-50 audience. All traces removed (songpack, symlink, zip).
+- **CLI helper:** `services/ddr/scripts/curate.sh` (`list`, `rm`, `rm-title`,
+  `undo`, `rescan`).
+- **Rollback:** original pack symlinks archived at
+  `~/ddr-songs-symlinks-backup/`; OutFox cache backup `/tmp/OutFox.cache.bak`.
+
+### 2026-11-08 — ADDING CONTENT FROM STEPMANIAONLINE.BY PREFERENCE (PLAN, reset-ready)
+
+**Goal:** grow the DDR library on `.54` with charts for songs *callen actually
+plays*, ranked by play count. Source = stepmaniaonline.net (site w/ anomalous #
+of charts; catalog already local). Owner: 1.19.3.
+
+**Site = `stepmaniaonline.net` (FACT).** Open-source Django app
+(`github.com/concubidated/simfile-pack-search`), behind Cloudflare. It has a real
+**song search** (`/search`, form fields `type` ∈ title|artist|pack|credit).
+
+#### THE UNLOCK (FACT, verified 2026-11-08 by curl)
+A plain **GET JSON API** — no CSRF, no cookie jar, no POST (the earlier failure
+was POSTing the HTML form + using the wrong param name + missing trailing slash):
+
+```
+GET https://stepmaniaonline.net/api/search/?type=title&query=<URL-encoded>
+```
+- **Param is `query`** (NOT `search` — `search` silently returns `{"results": []}`).
+- Must include the **trailing slash**: `/api/search/?` (without → 301 → 404-ish).
+- Returns: `{"results": [{"id","name","songs_count","type":[...],"matching_songs":[...]}]}`
+  - `id` → pack id. Pack page `https://stepmaniaonline.net/pack/{id}`,
+    download `https://stepmaniaonline.net/download/pack/{id}/`.
+  - `matching_songs` = the **exact charted titles** in that pack (case variants
+    preserved) → lets us exact-match a requested song, not just keyword-match.
+  - `type` includes `"dance"` only for the packs we can load in OutFox.
+- Also works: `type=pack` (filter by pack name), `type=artist` (fuzzy — **weak**;
+  `type=title` is the reliable matcher; verified `artist=Jungle` returned mostly
+  wrong "boom/jungle" keyword hits).
+- **Download = just `curl`** the `/download/pack/{id}/` URL (a zip). No auth.
+- **Gotcha (FACT):** Cloudflare sometimes returns **0 bytes** to a curl without a
+  real UA or with rapid retries. Always send `-A "Mozilla/5.0 ..."`; on a 0-byte
+  body, sleep 2–3s and retry (max 3). `/api/packs` (full 10,075-pack list) also
+  works the same way — that's how `pack-catalog.json` was built.
+
+**Test that proved it** (run 2026-11-08):
+- `title=Shake It Off` → `100 pc. Chicken McNuggets` (id 4311, exact "Shake It Off"),
+  `4 o' KLOC` (id 79), `49 & Under` (id 5360, "Shake It Off (Crysis Remix)"), `SPEIRMIX 2016` (id 376)…
+- `title=Tick Tick Boom` (The Hives) → **1 hit**: `Mozata Simfiles` id **7465** (84 songs, dance).
+
+#### PREFERENCE SIGNAL: YouTube play counts (FACT)
+`~/Music/iTunes/...xml` has **zero** play counts (all 0) → dropped. The real
+signal is **Chrome watch history** (`~/Library/Application Support/Google/Chrome/
+Default/History`, sqlite). Extracted 154 youtube.com/watch URLs; `visit_count` =
+times watched = the play-count proxy. Top-played (cleaned):
+1. Jungle — Move Like You Do (8)
+2. Running Up That Hill x Stranger Things (Synthwave Remix) (6)
+3. Jungle — The Wave (4) · Daði Freyr — I'm Out & I Wanna Go Home (4) · Oliver Tree — Invisible Man (4)
+4. Swipe On Me (3) · I Knead Dem Biscuits (3) · **The Hives — Tick Tick Boom (3)**
+5. Miki — it stings a little though (3) · i'm a bug (3)
+(2-counts next: The Hives already used; Smashing Pumpkins — Today, Dispatch — I'm A B*tch, Jungle — Back On 74, Jungle — Keep Moving Casio, Send Me An Angel…)
+
+> Note: Chrome history is a proxy, not a true play counter, and it only spans
+> what's in this profile's history window. Good enough to rank "what I play most."
+
+#### PLAN (execute top→down; stop when 5 songs are FOUND)
+1. **Build the ranked song list** from Chrome history (top ~25 by `visit_count`).
+   Script: read `History` → `urls` → regex `youtube\.com/watch\?v=` →
+   `SUM(visit_count)` per title (strip the `(NNN) Channel - YouTube` suffix).
+   Output: `rank, title, artist, youtube_id, visits`.
+2. **For each song, top-down, query the API** `type=title&query=<title>`:
+   - Keep hits where `type` includes `dance`.
+   - **Exact-match** `matching_songs` against the requested title (case-insensitive,
+     ignore "(Remix)"/"(Official…)" suffixes) → strong match. If none exact, the
+     first dance hit is a "candidate" (flag it, don't auto-count as found).
+   - Record the best pack: `id, name, songs_count, size (from pack-catalog.json
+     by id), date, matching_songs`.
+   - One API call per song; sleep ~1.5s between calls (Cloudflare friendliness).
+   - **When 5 songs have a FOUND (exact) match → stop and report** (owner said
+     "when you reach 5 found, return to me").
+3. **Report** a table: `# · song (visits) → best pack (id, songs, size, date) · match`.
+   Flag candidates separately. Recommend the *smallest* pack that covers the most
+   found songs (avoid re-downloading 5 GB mega-packs for one track).
+4. **Download** the chosen pack(s): `curl -A <UA> -o pack{id}.zip
+   https://stepmaniaonline.net/download/pack/{id}/`.
+5. **Ingest** into `songpacks/Library` (or a new pack) + `curate.sh rescan` to
+   rebuild the OutFox cache; verify via `curate.sh list` + OutFox `Found N songs`.
+   (Reuse the exact ingest path noted in SOURCES.md — all content is re-downloadable.)
+
+#### DECISIONS / GUARDRAILS
+- Prefer **`type=title`** matches. Treat `type=artist` results as candidates only.
+- Only `"dance"` packs load in OutFox (ignore pump/iidx/maniax/e2d/para/bm unless
+  explicitly wanted).
+- Smallest-pack-first to keep `.54` storage lean; mega-packs (#774 CONVERT 1568
+  songs, DDR MASSIVE MANIA 622) only if they cover several found songs.
+- Don't commit the zip; `songpacks/` + `media/` are gitignored.
+- Keep a hypothesis ledger: a "match" is only real if `matching_songs` contains
+  the title verbatim; a pack name containing a keyword is NOT a match.
+- **Open question for owner (ask before downloading >1 GB):** do we want the
+  *smallest* pack per song, or the *biggest/cleanest* charts? Default = smallest
+  dance pack with an exact title match.
+
+#### NEXT ACTION FOR FRESH AGENT
+Run steps 1–3 above (read Chrome History, loop the `query` API, stop at 5 exact
+found, report the table). Do **not** download until the owner picks pack(s).
+The 5-found rule is hard. All endpoints + a working curl are proven above.
 
 ---
 
